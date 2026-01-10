@@ -1,0 +1,71 @@
+<div class="sidebar" [class.collapsed]="isCollapsed">
+
+  <div class="logo-header">
+    <div class="logo-text" *ngIf="!isCollapsed">
+      <h2>Lendify</h2>
+      <span>{{ currentRole | titlecase }} Portal</span>
+    </div>
+
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      <i class="fas" [ngClass]="isCollapsed ? 'fa-angle-double-right' : 'fa-angle-double-left'"></i>
+    </button>
+  </div>
+
+  <ul class="menu">
+    <li>
+      <a routerLink="/dashboard" routerLinkActive="active" title="Dashboard">
+        <i class="fas fa-th-large"></i>
+        <span *ngIf="!isCollapsed">Dashboard</span>
+      </a>
+    </li>
+
+    <ng-container *ngIf="currentRole === 'admin'">
+      <li>
+        <a routerLink="/borrow-return" routerLinkActive="active" title="Loan Management">
+          <i class="fas fa-exchange-alt"></i>
+          <span *ngIf="!isCollapsed">Borrow/Return</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/items" routerLinkActive="active" title="Inventory">
+          <i class="fas fa-boxes"></i>
+          <span *ngIf="!isCollapsed">Manage Items</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/users" routerLinkActive="active" title="Users">
+          <i class="fas fa-users"></i>
+          <span *ngIf="!isCollapsed">Manage Users</span>
+        </a>
+      </li>
+    </ng-container>
+
+    <ng-container *ngIf="currentRole === 'student'">
+      <li>
+        <a routerLink="/items" routerLinkActive="active" title="Catalog">
+          <i class="fas fa-search"></i>
+          <span *ngIf="!isCollapsed">Browse Catalog</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/borrow-return" routerLinkActive="active" title="History">
+          <i class="fas fa-history"></i>
+          <span *ngIf="!isCollapsed">My History</span>
+        </a>
+      </li>
+    </ng-container>
+  </ul>
+
+  <div class="user-profile">
+    <div class="avatar">{{ userName.charAt(0).toUpperCase() }}</div>
+
+    <div class="info" *ngIf="!isCollapsed">
+      <strong>{{ userName }}</strong>
+      <small>{{ currentRole | titlecase }}</small>
+    </div>
+
+    <button class="logout-btn" (click)="logout()" title="Logout">
+      <i class="fas fa-sign-out-alt"></i>
+    </button>
+  </div>
+</div>

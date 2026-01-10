@@ -1,0 +1,88 @@
+/* Container Utama Sidebar */
+.sidebar {
+  width: 260px; /* Lebar Normal */
+  height: 100vh;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  display: flex; flex-direction: column;
+  padding: 1.5rem 1rem;
+  transition: width 0.3s ease; /* Animasi Halus */
+  box-sizing: border-box;
+  flex-shrink: 0; /* Jangan biarkan sidebar terjepit */
+
+  /* --- MODE COLLAPSED (KECIL) --- */
+  &.collapsed {
+    width: 80px; /* Lebar saat dikecilkan */
+    padding: 1.5rem 0.5rem;
+
+    .menu a { justify-content: center; }
+    .menu a i { margin-right: 0; font-size: 1.2rem; }
+    .user-profile { justify-content: center; padding: 0.5rem; }
+    .logout-btn { display: none; } /* Sembunyikan tombol logout kecil, atau sesuaikan */
+    .avatar { width: 40px; height: 40px; margin: 0; }
+  }
+}
+
+/* Header Logo & Toggle */
+.logo-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 2.5rem; padding: 0 0.5rem;
+  min-height: 50px; /* Jaga tinggi agar tidak lompat */
+
+  .logo-text {
+    h2 { margin: 0; color: #5d5fef; font-size: 1.5rem; white-space: nowrap; }
+    span { font-size: 0.75rem; color: #9ca3af; text-transform: uppercase; white-space: nowrap; }
+  }
+
+  .toggle-btn {
+    background: transparent; border: none; cursor: pointer; color: #9ca3af; font-size: 1.1rem;
+    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 4px;
+    &:hover { background: #f3f4f6; color: #5d5fef; }
+  }
+}
+/* Jika collapsed, center tombol toggle */
+.collapsed .logo-header { justify-content: center; }
+
+
+/* Menu Styles */
+.menu {
+  list-style: none; padding: 0; margin: 0; flex: 1;
+
+  li { margin-bottom: 0.5rem; }
+
+  a {
+    display: flex; align-items: center;
+    padding: 0.85rem 1rem;
+    color: #6b7280; text-decoration: none; font-weight: 600; font-size: 0.95rem; border-radius: 8px;
+    transition: all 0.2s; white-space: nowrap; overflow: hidden;
+
+    i { width: 24px; text-align: center; margin-right: 12px; transition: margin 0.3s; }
+
+    &:hover { background-color: #f3f4f6; color: #5d5fef; }
+    &.active { background-color: #eff6ff; color: #5d5fef; }
+  }
+}
+
+/* User Profile Footer */
+.user-profile {
+  background: #f8fafc; padding: 0.75rem; border-radius: 12px;
+  display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0;
+  overflow: hidden;
+
+  .avatar {
+    width: 36px; height: 36px; background: linear-gradient(135deg, #5d5fef, #a855f7); color: white;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;
+  }
+
+  .info {
+    display: flex; flex-direction: column; flex: 1; overflow: hidden;
+    strong { font-size: 0.85rem; color: #1e293b; white-space: nowrap; }
+    small { font-size: 0.75rem; color: #64748b; white-space: nowrap; }
+  }
+
+  .logout-btn {
+    background: white; border: 1px solid #fee2e2; color: #ef4444; width: 32px; height: 32px; border-radius: 6px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    &:hover { background: #ef4444; color: white; }
+  }
+}

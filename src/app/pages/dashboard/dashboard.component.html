@@ -1,0 +1,123 @@
+<div class="layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="content">
+    <header>
+      <div class="welcome-text">
+        <h2>Dashboard</h2>
+        <p *ngIf="userRole === 'admin'">System Overview & Inventory Alerts</p>
+        <p *ngIf="userRole === 'student'">Welcome! Ready to borrow equipment?</p>
+      </div>
+
+      <div class="date-badge">
+        <i class="far fa-clock"></i>
+        {{ now | date:'EEEE, d MMMM y - HH:mm:ss' }}
+      </div>
+    </header>
+
+    <div *ngIf="userRole === 'admin'">
+
+      <div class="stats-grid">
+        <div class="card border-blue clickable" routerLink="/items">
+          <div class="card-icon blue"><i class="fas fa-boxes"></i></div>
+          <div class="card-info">
+            <span>Total Items</span>
+            <h3>{{ totalItems }}</h3>
+          </div>
+        </div>
+        <div class="card border-green clickable" routerLink="/items">
+          <div class="card-icon green"><i class="fas fa-check-circle"></i></div>
+          <div class="card-info">
+            <span>Available</span>
+            <h3>{{ totalAvailable }}</h3>
+          </div>
+        </div>
+        <div class="card border-orange clickable" routerLink="/borrow-return">
+          <div class="card-icon orange"><i class="fas fa-clock"></i></div>
+          <div class="card-info">
+            <span>Borrowed</span>
+            <h3>{{ totalBorrowed }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-label">Quick Actions</h3>
+      <div class="quick-actions">
+        <button class="action-btn" routerLink="/borrow-return">
+          <div class="icon-circle bg-indigo"><i class="fas fa-plus"></i></div>
+          <span>New Borrow</span>
+        </button>
+        <button class="action-btn" routerLink="/borrow-return">
+          <div class="icon-circle bg-emerald"><i class="fas fa-undo"></i></div>
+          <span>Return Item</span>
+        </button>
+        <button class="action-btn" routerLink="/items">
+          <div class="icon-circle bg-blue"><i class="fas fa-box-open"></i></div>
+          <span>Add Stock</span>
+        </button>
+        <button class="action-btn" routerLink="/users">
+          <div class="icon-circle bg-dark"><i class="fas fa-users"></i></div>
+          <span>Manage Users</span>
+        </button>
+      </div>
+
+      <div class="side-panel" style="margin-top: 20px;">
+        <div class="panel-header"><h3>Low Stock Alerts</h3></div>
+        <div class="alert-list">
+          <div class="alert-item warning" *ngFor="let item of lowStockItems">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div><strong>{{ item.name }}</strong><p>Only {{ item.stock }} units left</p></div>
+          </div>
+          <div class="info-card" *ngIf="lowStockItems.length === 0">
+            <i class="fas fa-check-circle"></i><p>All stock levels are healthy.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="userRole === 'student'">
+
+      <div class="stats-grid">
+        <div class="card border-blue clickable" routerLink="/items">
+          <div class="card-icon blue"><i class="fas fa-search"></i></div>
+          <div class="card-info">
+            <span>Catalog</span>
+            <h3>{{ totalItems }} <small style="font-size:0.8rem">Items</small></h3>
+          </div>
+        </div>
+        <div class="card border-orange">
+          <div class="card-icon orange"><i class="fas fa-clock"></i></div>
+          <div class="card-info">
+            <span>My Loans</span>
+            <h3>0 <small style="font-size:0.8rem">Active</small></h3>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-label">Student Actions</h3>
+      <div class="quick-actions">
+        <button class="action-btn" routerLink="/items">
+          <div class="icon-circle bg-indigo"><i class="fas fa-shopping-cart"></i></div>
+          <span>Browse Catalog</span>
+        </button>
+        <button class="action-btn" routerLink="/borrow-return">
+          <div class="icon-circle bg-emerald"><i class="fas fa-list-alt"></i></div>
+          <span>My History</span>
+        </button>
+      </div>
+
+      <div class="main-panel">
+        <div class="panel-header"><h3>My Recent Requests</h3></div>
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Item</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Dell Laptop</td><td>Today</td><td><span class="badge badge-orange">Pending Approval</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>

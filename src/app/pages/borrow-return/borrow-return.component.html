@@ -1,0 +1,120 @@
+<div class="layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="content">
+
+    <header class="page-header">
+      <div>
+        <h2 *ngIf="userRole === 'student'">My History</h2>
+        <h2 *ngIf="userRole === 'admin'">Loan Management</h2>
+
+        <p *ngIf="userRole === 'student'">Track your request status and active loans.</p>
+        <p *ngIf="userRole === 'admin'">Approve requests and monitor loans.</p>
+      </div>
+
+      <div class="tab-buttons" *ngIf="userRole === 'admin'">
+
+        <button [class.active]="adminTab === 'requests'" (click)="adminTab = 'requests'">
+          Requests <span class="badge-count" *ngIf="pendingRequests.length > 0">{{ pendingRequests.length }}</span>
+        </button>
+
+        <button [class.active]="adminTab === 'active'" (click)="adminTab = 'active'">
+          Active Loans <span class="badge-count bg-blue" *ngIf="activeLoans.length > 0">{{ activeLoans.length }}</span>
+        </button>
+
+        <button [class.active]="adminTab === 'history'" (click)="adminTab = 'history'">History</button>
+      </div>
+    </header>
+
+    <div class="table-container" *ngIf="userRole === 'admin' && adminTab === 'requests'">
+      <div class="audit-info warn">
+        <i class="fas fa-exclamation-circle"></i> These requests need your approval before items are handed over.
+      </div>
+      <table>
+        <thead><tr><th>Item</th><th>Borrower</th><th>Qty</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let log of pendingRequests">
+            <td class="font-medium">{{ log.itemName }}</td>
+            <td><strong>{{ log.borrower }}</strong></td>
+            <td>{{ log.qty }}</td>
+            <td class="text-muted">{{ log.borrowDate | date:'short' }}</td>
+            <td>
+              <button class="btn-sm btn-approve" (click)="approveRequest(log)">Approve</button>
+              <button class="btn-sm btn-reject" (click)="rejectRequest(log)">Reject</button>
+            </td>
+          </tr>
+          <tr *ngIf="pendingRequests.length === 0"><td colspan="5" class="empty-msg">No pending requests.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-container" *ngIf="userRole === 'admin' && adminTab === 'active'">
+      <table>
+        <thead><tr><th>Item</th><th>Borrower</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let log of activeLoans">
+            <td class="font-medium">{{ log.itemName }}</td>
+            <td>{{ log.borrower }}</td>
+            <td>{{ log.borrowDate | date:'mediumDate' }}</td>
+            <td><span class="badge badge-orange">Borrowed</span></td>
+            <td><button class="btn-sm btn-return" (click)="adminForceReturn(log)">Force Return</button></td>
+          </tr>
+          <tr *ngIf="activeLoans.length === 0"><td colspan="5" class="empty-msg">No active loans.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-container" *ngIf="userRole === 'admin' && adminTab === 'history'">
+      <table>
+        <thead><tr><th>Item</th><th>Borrower</th><th>Borrowed</th><th>Returned</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let log of allHistory">
+            <td class="font-medium">{{ log.itemName }}</td>
+            <td>{{ log.borrower }}</td>
+            <td class="text-muted">{{ log.borrowDate | date:'shortDate' }}</td>
+            <td>
+                <span *ngIf="log.returnDate">{{ log.returnDate | date:'shortDate' }}</span>
+                <span *ngIf="!log.returnDate">-</span>
+            </td>
+            <td>
+              <span class="badge"
+                [class.badge-orange]="log.status === 'Borrowed'"
+                [class.badge-green]="log.status === 'Returned'"
+                [class.badge-grey]="log.status === 'Pending'"
+                [class.badge-red]="log.status === 'Rejected'">
+                {{ log.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-container" *ngIf="userRole === 'student'">
+      <table>
+        <thead><tr><th>Item</th><th>Date</th><th>Qty</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let log of myBorrowings">
+            <td class="font-medium">{{ log.itemName }}</td>
+            <td class="text-muted">{{ log.borrowDate | date:'mediumDate' }}</td>
+            <td>{{ log.qty }}</td>
+            <td>
+                <span class="badge badge-grey" *ngIf="log.status === 'Pending'"><i class="fas fa-clock"></i> Pending</span>
+                <span class="badge badge-orange" *ngIf="log.status === 'Borrowed'">Active</span>
+                <span class="badge badge-green" *ngIf="log.status === 'Returned'">Returned</span>
+                <span class="badge badge-red" *ngIf="log.status === 'Rejected'">Rejected</span>
+            </td>
+            <td class="text-right">
+              <button class="btn-sm btn-return" *ngIf="log.status === 'Borrowed'" (click)="returnItem(log)">Return</button>
+              <span class="text-muted small" *ngIf="log.status === 'Pending'">Wait for approval</span>
+            </td>
+          </tr>
+          <tr *ngIf="myBorrowings.length === 0">
+             <td colspan="5" class="empty-msg">No history found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>

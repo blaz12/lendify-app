@@ -1,0 +1,83 @@
+<div class="layout" *ngIf="userRole === 'admin'">
+  <app-sidebar></app-sidebar>
+
+  <main class="content">
+    <header class="page-header">
+      <h2>User Management</h2>
+
+      <div class="header-actions">
+        <div class="tab-buttons">
+            <button [class.active]="currentTab === 'active'" (click)="switchTab('active')">Active Users</button>
+            <button [class.active]="currentTab === 'pending'" (click)="switchTab('pending')">
+                Requests
+                <span class="badge-count" *ngIf="pendingUsers.length > 0">{{ pendingUsers.length }}</span>
+            </button>
+            <button [class.active]="currentTab === 'deleted'" (click)="switchTab('deleted')">Deleted</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="table-container" *ngIf="currentTab === 'active'">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Student ID</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of activeUsers">
+            <td class="font-medium">{{ user.name }}</td>
+            <td>{{ user.studentId }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td><span class="badge available">Active</span></td>
+            <td>
+              <button class="btn-text delete" (click)="deleteUser(user.id)">Deactivate</button>
+            </td>
+          </tr>
+          <tr *ngIf="activeUsers.length === 0"><td colspan="6">No active users found.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-container" *ngIf="currentTab === 'pending'">
+
+        <div class="info-box" *ngIf="pendingUsers.length > 0">
+            <i class="fas fa-info-circle"></i> These students are waiting for approval to access the system.
+        </div>
+
+        <div class="empty-state" *ngIf="pendingUsers.length === 0" style="padding: 2rem; text-align: center; color: #888;">
+            No pending registration requests.
+        </div>
+
+        <table *ngIf="pendingUsers.length > 0">
+          <thead>
+            <tr><th>Name</th><th>Student ID</th><th>Email</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of pendingUsers">
+              <td class="font-medium">{{ user.name }}</td>
+              <td>{{ user.studentId }}</td>
+              <td>{{ user.email }}</td>
+              <td>
+                <button class="btn-approve" (click)="approveUser(user)">Approve</button>
+                <button class="btn-reject" (click)="rejectUser(user)">Reject</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+    </div>
+
+    <div class="table-container" *ngIf="currentTab === 'deleted'">
+         <table>
+            <thead><tr><th>Name</th><th>Role</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr *ngFor="let user of deletedUsers">
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.role }}</td>
+                    <td style="color: red;">Inactive</td>
+                </tr>
+            </tbody>
+         </table>
+    </div>
+
+  </main>
+</div>

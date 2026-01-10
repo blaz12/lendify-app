@@ -1,0 +1,190 @@
+<div class="layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="content">
+
+    <header class="page-header">
+      <div>
+        <h2>{{ userRole === 'admin' ? 'Inventory Management' : 'Equipment Catalog' }}</h2>
+        <p *ngIf="userRole === 'admin'">Add, edit, and track your physical assets.</p>
+        <p *ngIf="userRole === 'student'">Browse items and make borrowing requests.</p>
+      </div>
+
+      <div class="header-actions">
+
+        <button *ngIf="userRole === 'admin'" class="btn-primary" (click)="showForm = !showForm">
+          <i class="fas" [ngClass]="showForm ? 'fa-times' : 'fa-plus'"></i>
+          {{ showForm ? 'Cancel Adding' : 'Add New Item' }}
+        </button>
+
+        <button *ngIf="userRole === 'student'" class="btn-primary-large" (click)="openBorrowModal()">
+           <i class="fas fa-cart-plus"></i> Create Borrow Request
+        </button>
+
+      </div>
+    </header>
+
+    <div class="add-item-card slide-down" *ngIf="showForm && userRole === 'admin'">
+      <div class="card-header">
+        <h3>Input New Inventory Item</h3>
+      </div>
+
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Item Name <span class="req">*</span></label>
+            <input [(ngModel)]="newItem.name" class="form-control" placeholder="e.g. MacBook Pro M2">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select [(ngModel)]="newItem.category" class="form-control">
+              <option value="Laptop">Laptop</option>
+              <option value="Camera">Camera</option>
+              <option value="Audio">Audio</option>
+              <option value="Projector">Projector</option>
+              <option value="Accessory">Accessory</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Stock Quantity <span class="req">*</span></label>
+            <input [(ngModel)]="newItem.stock" type="number" min="0" class="form-control" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Storage Location <span class="req">*</span></label>
+            <input [(ngModel)]="newItem.location" class="form-control" placeholder="e.g. Cabinet A, Room 101">
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn-secondary" (click)="showForm = false">Cancel</button>
+        <button class="btn-save" (click)="saveRealItem()" [disabled]="isSaving">
+          <i class="fas fa-save"></i> {{ isSaving ? 'Saving...' : 'Save to Database' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th width="30%">Item Name</th>
+            <th>Category</th>
+            <th>Stock</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th *ngIf="userRole === 'admin'" class="text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of items">
+            <td>
+              <span class="item-name">{{ item.name }}</span>
+            </td>
+            <td><span class="category-tag">{{ item.category }}</span></td>
+            <td>
+               <span [class.text-danger]="item.stock === 0" style="font-weight: 600;">
+                 {{ item.stock }}
+               </span>
+            </td>
+            <td>{{ item.location }}</td>
+            <td>
+              <span class="badge" [ngClass]="item.stock > 0 ? 'available' : 'out'">
+                {{ item.stock > 0 ? 'Available' : 'Out of Stock' }}
+              </span>
+            </td>
+
+            <td *ngIf="userRole === 'admin'" class="text-right">
+              <button class="btn-icon delete" (click)="deleteItem(item.id)" title="Delete Item">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="items.length === 0">
+            <td colspan="6" class="empty-state">
+              <div class="empty-content">
+                <i class="fas fa-box-open"></i>
+                <p>No inventory items found.</p>
+                <button *ngIf="userRole === 'admin'" class="btn-link" (click)="showForm = true">
+                  + Add your first item
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="modal-overlay" *ngIf="isModalOpen">
+      <div class="modal-content large-modal">
+
+        <div class="modal-header">
+          <h3>Create Borrow Request</h3>
+          <button class="close-btn" (click)="closeModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-section">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Usage Location</label>
+                <select [(ngModel)]="borrowRequest.location" class="form-control">
+                  <option value="" disabled selected>Select location...</option>
+                  <option value="Classroom 101">Classroom 101</option>
+                  <option value="Lab Computer">Lab Computer</option>
+                  <option value="Auditorium">Auditorium</option>
+                  <option value="Meeting Room">Meeting Room</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Purpose / Event</label>
+                <input type="text" [(ngModel)]="borrowRequest.purpose" class="form-control" placeholder="e.g. Final Project Presentation">
+              </div>
+            </div>
+          </div>
+
+          <h4 class="section-title">Select Items</h4>
+          <div class="item-select-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>ITEM</th>
+                  <th>AVAIL</th>
+                  <th width="100">QUANTITY</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of items" [class.selected-row]="item.requestQty > 0">
+                  <td class="font-medium">
+                    {{ item.name }}
+                    <div class="text-muted small">{{ item.category }}</div>
+                  </td>
+                  <td>{{ item.stock }}</td>
+                  <td>
+                    <input type="number" min="0" [max]="item.stock"
+                           [(ngModel)]="item.requestQty"
+                           [disabled]="item.stock === 0"
+                           class="form-control qty-input">
+                  </td>
+                </tr>
+                <tr *ngIf="items.length === 0">
+                    <td colspan="3" class="text-center p-4">No items available to borrow.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+          <button class="btn-save" (click)="submitBorrow()" [disabled]="isSubmitting">
+             {{ isSubmitting ? 'Submitting...' : 'Confirm Request' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
