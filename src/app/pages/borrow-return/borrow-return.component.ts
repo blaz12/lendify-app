@@ -121,4 +121,48 @@ export class BorrowReturnComponent implements OnInit {
         alert('Error processing return.');
     }
   }
+  exportToCSV() {
+    // 1. Tentukan data mana yang mau di-export (History Admin)
+    const dataToExport = this.allHistory.map(log => ({
+      Item: log.itemName,
+      Borrower: log.borrower,
+      BorrowDate: new Date(log.borrowDate).toLocaleDateString(),
+      DueDate: new Date(log.dueDate).toLocaleDateString(),
+      ReturnDate: log.returnDate ? new Date(log.returnDate).toLocaleDateString() : '-',
+      Status: log.status,
+      Condition: log.returnCondition || '-'
+    }));
+
+    if (dataToExport.length === 0) {
+      alert('No data to export');
+      return;
+    }
+
+    // 2. Buat Header CSV
+    const headers = Object.keys(dataToExport[0]);
+    const csvRows = [];
+    csvRows.push(headers.join(','));
+
+    // 3. Masukkan Baris Data
+    for (const row of dataToExport) {
+      const values = headers.map(header => {
+        const val = (row as any)[header];
+        // Escape tanda koma agar tidak merusak format CSV
+        return `"${val}"`;
+      });
+      csvRows.push(values.join(','));
+    }
+
+    // 4. Buat File Blob & Download
+    const csvString = csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Lendify_Report_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
 }
+

@@ -19,6 +19,9 @@
           Active Loans <span class="badge-count bg-blue" *ngIf="activeLoans.length > 0">{{ activeLoans.length }}</span>
         </button>
         <button [class.active]="adminTab === 'history'" (click)="adminTab = 'history'">History</button>
+        <button *ngIf="adminTab === 'history'" (click)="exportToCSV()" style="background: #10b981; color: white; margin-left: 10px;">
+          <i class="fas fa-file-excel"></i> Export CSV
+        </button>
       </div>
     </header>
 
