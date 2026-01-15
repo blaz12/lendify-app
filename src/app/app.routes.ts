@@ -5,48 +5,21 @@ import { ManageItemsComponent } from './pages/manage-items/manage-items.componen
 import { ManageUsersComponent } from './pages/manage-users/manage-users.component';
 import { BorrowReturnComponent } from './pages/borrow-return/borrow-return.component';
 import { ProfileComponent } from './pages/profile/profile.component';
+// Import Not Found
+import { NotFoundComponent } from './pages/not-found/not-found.component';
 
-// Import Guard yang baru dibuat
 import { authGuard, adminGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
 
-  // --- HALAMAN YANG PERLU LOGIN (AuthGuard) ---
-  {
-    path: 'dashboard',
-    component: DashboardComponent,
-    canActivate: [authGuard]
-  },
-  {
-    path: 'profile',
-    component: ProfileComponent,
-    canActivate: [authGuard]
-  },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
+  { path: 'items', component: ManageItemsComponent, canActivate: [authGuard] },
+  { path: 'borrow-return', component: BorrowReturnComponent, canActivate: [authGuard] },
+  { path: 'users', component: ManageUsersComponent, canActivate: [authGuard, adminGuard] },
 
-  // --- HALAMAN KHUSUS ADMIN (AdminGuard) ---
-  // Student tidak boleh masuk sini
-  {
-    path: 'users',
-    component: ManageUsersComponent,
-    canActivate: [authGuard, adminGuard]
-  },
-
-  // --- HALAMAN CAMPURAN (Tapi perlu Login) ---
-  // Logic Admin/Student sudah dihandle di dalam komponen (ngIf)
-  // Tapi tetap harus login dulu
-  {
-    path: 'items',
-    component: ManageItemsComponent,
-    canActivate: [authGuard]
-  },
-  {
-    path: 'borrow-return',
-    component: BorrowReturnComponent,
-    canActivate: [authGuard]
-  },
-
-  // Wildcard (Jika user ketik url ngawur)
-  { path: '**', redirectTo: 'login' }
+  // [UPDATE] Ganti redirect login dengan Component 404
+  { path: '**', component: NotFoundComponent }
 ];
