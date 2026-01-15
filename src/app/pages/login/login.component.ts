@@ -75,6 +75,7 @@ export class LoginComponent {
           // LOGIN SUKSES
           localStorage.setItem('demoRole', user.role.toLowerCase());
           localStorage.setItem('userName', user.name);
+          localStorage.setItem('userEmail', user.email);
           this.router.navigate(['/dashboard']);
 
         } else {

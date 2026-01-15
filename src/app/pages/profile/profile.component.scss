@@ -1,0 +1,60 @@
+.layout { display: flex; height: 100vh; background: #f8fafc; }
+.content { flex: 1; padding: 2rem; overflow-y: auto; }
+
+.page-header { margin-bottom: 2rem; h2 { margin: 0; color: #1e293b; } p { margin: 5px 0 0; color: #64748b; } }
+
+.profile-container {
+    display: flex; justify-content: center;
+}
+
+.profile-card {
+    background: white; width: 100%; max-width: 600px;
+    padding: 2.5rem; border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    display: flex; flex-direction: column; align-items: center;
+
+    .avatar-large {
+        width: 80px; height: 80px; background: linear-gradient(135deg, #5d5fef, #a855f7);
+        color: white; font-size: 2.5rem; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%; margin-bottom: 1rem;
+        box-shadow: 0 4px 10px rgba(93, 95, 239, 0.3);
+    }
+
+    .role-badge {
+        background: #eff6ff; color: #3b82f6; padding: 4px 12px; border-radius: 20px;
+        font-weight: 600; font-size: 0.8rem; margin-bottom: 2rem;
+    }
+
+    form { width: 100%; }
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+    label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #334155; font-size: 0.9rem; }
+    .form-control {
+        width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 0.95rem;
+        &:focus { outline: none; border-color: #5d5fef; }
+        &.disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+    }
+}
+
+.form-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+
+hr { border: 0; border-top: 1px solid #e2e8f0; margin: 1.5rem 0; }
+h4 { margin: 0 0 5px 0; color: #1e293b; }
+.text-muted { color: #94a3b8; font-size: 0.85rem; margin-bottom: 1rem; display: block; }
+
+.actions {
+    margin-top: 1rem; text-align: right;
+    .btn-primary {
+        background: #5d5fef; color: white; border: none; padding: 0.85rem 2rem;
+        border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+        &:hover { background: #4b4dce; }
+        &:disabled { background: #a5a6f6; }
+    }
+}
