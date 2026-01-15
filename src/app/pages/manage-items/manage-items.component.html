@@ -12,9 +12,8 @@
 
       <div class="header-actions">
 
-        <button *ngIf="userRole === 'admin'" class="btn-primary" (click)="showForm = !showForm">
-          <i class="fas" [ngClass]="showForm ? 'fa-times' : 'fa-plus'"></i>
-          {{ showForm ? 'Cancel Adding' : 'Add New Item' }}
+        <button *ngIf="userRole === 'admin'" class="btn-primary" (click)="showForm = true">
+          <i class="fas fa-plus"></i> Add New Item
         </button>
 
         <button *ngIf="userRole === 'student'" class="btn-primary-large" (click)="openBorrowModal()">
@@ -23,47 +22,6 @@
 
       </div>
     </header>
-
-    <div class="add-item-card slide-down" *ngIf="showForm && userRole === 'admin'">
-      <div class="card-header">
-        <h3>Input New Inventory Item</h3>
-      </div>
-
-      <div class="card-body">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Item Name <span class="req">*</span></label>
-            <input [(ngModel)]="newItem.name" class="form-control" placeholder="e.g. MacBook Pro M2">
-          </div>
-          <div class="form-group">
-            <label>Category</label>
-            <select [(ngModel)]="newItem.category" class="form-control">
-              <option value="Laptop">Laptop</option>
-              <option value="Camera">Camera</option>
-              <option value="Audio">Audio</option>
-              <option value="Projector">Projector</option>
-              <option value="Accessory">Accessory</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Stock Quantity <span class="req">*</span></label>
-            <input [(ngModel)]="newItem.stock" type="number" min="0" class="form-control" placeholder="0">
-          </div>
-          <div class="form-group">
-            <label>Storage Location <span class="req">*</span></label>
-            <input [(ngModel)]="newItem.location" class="form-control" placeholder="e.g. Cabinet A, Room 101">
-          </div>
-        </div>
-      </div>
-
-      <div class="card-footer">
-        <button class="btn-secondary" (click)="showForm = false">Cancel</button>
-        <button class="btn-save" (click)="saveRealItem()" [disabled]="isSaving">
-          <i class="fas fa-save"></i> {{ isSaving ? 'Saving...' : 'Save to Database' }}
-        </button>
-      </div>
-    </div>
 
     <div class="table-container">
       <table>
@@ -117,31 +75,77 @@
       </table>
     </div>
 
-    <div class="modal-overlay" *ngIf="isModalOpen">
-      <div class="modal-content large-modal">
+    <div class="modal-overlay" *ngIf="showForm && userRole === 'admin'">
+      <div class="modal-content"> <div class="modal-header">
+          <h3>Input New Inventory</h3>
+          <button class="close-btn" (click)="showForm = false">&times;</button>
+        </div>
 
-        <div class="modal-header">
+        <div class="modal-body">
+          <div class="form-grid">
+
+            <div class="form-group full-width">
+              <label>Item Name <span class="req">*</span></label>
+              <input [(ngModel)]="newItem.name" class="form-control" placeholder="e.g. MacBook Pro M2">
+            </div>
+
+            <div class="form-group">
+              <label>Category</label>
+              <select [(ngModel)]="newItem.category" class="form-control">
+                <option value="Laptop">Laptop</option>
+                <option value="Camera">Camera</option>
+                <option value="Audio">Audio</option>
+                <option value="Projector">Projector</option>
+                <option value="Accessory">Accessory</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Stock Quantity <span class="req">*</span></label>
+              <input [(ngModel)]="newItem.stock" type="number" min="0" class="form-control" placeholder="0">
+            </div>
+
+            <div class="form-group full-width">
+              <label>Storage Location <span class="req">*</span></label>
+              <input [(ngModel)]="newItem.location" class="form-control" placeholder="e.g. Cabinet A, Room 101">
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showForm = false">Cancel</button>
+          <button class="btn-save" (click)="saveRealItem()" [disabled]="isSaving">
+            <i class="fas fa-save"></i> {{ isSaving ? 'Saving...' : 'Save Item' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="modal-overlay" *ngIf="isModalOpen">
+      <div class="modal-content large-modal"> <div class="modal-header">
           <h3>Create Borrow Request</h3>
           <button class="close-btn" (click)="closeModal()">&times;</button>
         </div>
 
         <div class="modal-body">
-          <div class="form-section">
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Usage Location</label>
-                <select [(ngModel)]="borrowRequest.location" class="form-control">
-                  <option value="" disabled selected>Select location...</option>
-                  <option value="Classroom 101">Classroom 101</option>
-                  <option value="Lab Computer">Lab Computer</option>
-                  <option value="Auditorium">Auditorium</option>
-                  <option value="Meeting Room">Meeting Room</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Purpose / Event</label>
-                <input type="text" [(ngModel)]="borrowRequest.purpose" class="form-control" placeholder="e.g. Final Project Presentation">
-              </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Usage Location</label>
+              <select [(ngModel)]="borrowRequest.location" class="form-control">
+                <option value="" disabled selected>Select location...</option>
+                <option value="Classroom 101">Classroom 101</option>
+                <option value="Lab Computer">Lab Computer</option>
+                <option value="Auditorium">Auditorium</option>
+                <option value="Meeting Room">Meeting Room</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Purpose / Event</label>
+              <input type="text" [(ngModel)]="borrowRequest.purpose" class="form-control" placeholder="e.g. Final Project">
             </div>
           </div>
 
@@ -170,11 +174,12 @@
                   </td>
                 </tr>
                 <tr *ngIf="items.length === 0">
-                    <td colspan="3" class="text-center p-4">No items available to borrow.</td>
+                    <td colspan="3" class="text-center p-4 text-muted">No items available to borrow.</td>
                 </tr>
               </tbody>
             </table>
           </div>
+
         </div>
 
         <div class="modal-footer">
@@ -183,6 +188,7 @@
              {{ isSubmitting ? 'Submitting...' : 'Confirm Request' }}
           </button>
         </div>
+
       </div>
     </div>
 

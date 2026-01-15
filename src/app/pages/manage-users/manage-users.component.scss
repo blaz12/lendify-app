@@ -117,3 +117,9 @@
   background: #eff6ff; color: #1e40af; padding: 12px; border-radius: 8px;
   margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; font-size: 0.9rem;
 }
+.btn-recover {
+  background: #3b82f6; color: white; border: none; padding: 6px 12px;
+  border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.8rem;
+  &:hover { background: #2563eb; }
+}
+.empty-msg { padding: 2rem; text-align: center; color: #9ca3af; }

@@ -75,4 +75,13 @@ export class ManageUsersComponent implements OnInit {
       await this.db.softDeleteUser(id);
     }
   }
+  // 4. Recover Deleted User
+  async recoverUser(id: string | undefined) {
+    if(!id) return;
+    if(confirm('Recover this user account?')) {
+      await this.db.recoverUser(id);
+      alert('User recovered successfully!');
+      this.currentTab = 'active'; // Pindah ke tab active untuk melihat hasilnya
+    }
+  }
 }
