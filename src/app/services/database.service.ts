@@ -5,17 +5,7 @@ import {
 import { Observable } from 'rxjs';
 
 export interface User { id?: string; name: string; email: string; studentId: string; role: 'Admin' | 'Student'; status: 'active' | 'pending' | 'rejected'; isDeleted?: boolean; password?: string; }
-
-// [UPDATE] Tambah imageUrl (optional)
-export interface Item {
-  id?: string;
-  name: string;
-  category: string;
-  stock: number;
-  location: string;
-  status: 'Available' | 'Damaged' | 'Lost';
-  imageUrl?: string;
-}
+export interface Item { id?: string; name: string; category: string; stock: number; location: string; status: 'Available' | 'Damaged' | 'Lost'; imageUrl?: string; }
 
 @Injectable({
   providedIn: 'root'
@@ -57,17 +47,32 @@ export class DatabaseService {
   }
 
   async approveBorrowRequest(borrowId: string) { const borrowRef = doc(this.firestore, `borrowings/${borrowId}`); await updateDoc(borrowRef, { status: 'Borrowed' }); }
+
   async rejectBorrowRequest(borrowLog: any) {
     const borrowRef = doc(this.firestore, `borrowings/${borrowLog.id}`);
+    // Update status jadi Rejected
     await updateDoc(borrowRef, { status: 'Rejected', returnDate: new Date().toISOString() });
+    // Kembalikan stok (PENTING: Kita perlu ambil stok saat ini dulu di component, lalu panggil restoreStock)
   }
+
   async restoreStock(itemId: string, qtyToAdd: number, currentStock: number) {
      const itemRef = doc(this.firestore, `items/${itemId}`);
      await updateDoc(itemRef, { stock: currentStock + qtyToAdd });
   }
-  async returnItem(borrowId: string, itemId: string, qty: number, currentStock: number) {
+
+  // [UPDATE] Tambah Parameter Condition
+  async returnItem(borrowId: string, itemId: string, qty: number, currentStock: number, condition: string) {
     const borrowRef = doc(this.firestore, `borrowings/${borrowId}`);
-    await updateDoc(borrowRef, { status: 'Returned', returnDate: new Date().toISOString() });
+
+    // Update Log
+    await updateDoc(borrowRef, {
+      status: 'Returned',
+      returnDate: new Date().toISOString(),
+      returnCondition: condition // Simpan kondisi (Good/Damaged/Lost)
+    });
+
+    // Update Stock (Hanya jika kondisi Good atau Damaged, jika Lost mungkin stok hilang permanen?)
+    // Untuk simplifikasi sistem ini: Kita anggap stok selalu kembali, nanti Admin delete item manual jika Lost.
     const itemRef = doc(this.firestore, `items/${itemId}`);
     await updateDoc(itemRef, { stock: currentStock + qty });
   }

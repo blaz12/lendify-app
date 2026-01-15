@@ -1,26 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // Penting untuk ngModel search
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { DatabaseService, User } from '../../services/database.service';
 
 @Component({
   selector: 'app-manage-users',
   standalone: true,
-  imports: [CommonModule, SidebarComponent],
+  imports: [CommonModule, SidebarComponent, FormsModule],
   templateUrl: './manage-users.component.html',
   styleUrls: ['./manage-users.component.scss']
 })
 export class ManageUsersComponent implements OnInit {
 
-  // Tab Management
-  currentTab: string = 'active'; // 'active' | 'pending' | 'deleted'
-
-  // Data Arrays
-  activeUsers: User[] = [];
-  pendingUsers: User[] = [];
-  deletedUsers: User[] = [];
+  // Data
+  allUsers: User[] = [];      // Data mentah dari DB sesuai tab
+  filteredUsers: User[] = []; // Data yang tampil (setelah search)
 
   userRole: string = 'admin';
+  currentTab: 'active' | 'pending' | 'deleted' = 'active';
+
+  // Search State
+  searchTerm: string = '';
 
   constructor(private db: DatabaseService) {}
 
@@ -29,38 +30,58 @@ export class ManageUsersComponent implements OnInit {
     this.loadData();
   }
 
+  // Load data berdasarkan Tab yang dipilih
   loadData() {
-    // 1. Ambil User Aktif
-    this.db.getActiveUsers().subscribe(data => this.activeUsers = data);
+    this.searchTerm = ''; // Reset search saat ganti tab
 
-    // 2. Ambil Request Pending (Mahasiswa Baru)
-    this.db.getPendingUsers().subscribe(data => this.pendingUsers = data);
-
-    // 3. Ambil User Terhapus
-    this.db.getDeletedUsers().subscribe(data => this.deletedUsers = data);
-  }
-
-  switchTab(tab: string) {
-    this.currentTab = tab;
-  }
-
-  // --- ADMIN ACTIONS ---
-
-  // 1. Approve Mahasiswa
-  async approveUser(user: User) {
-    if(!user.id) return;
-    if(confirm(`Approve registration for ${user.name}?`)) {
-      try {
-        await this.db.approveUser(user.id);
-        alert('User Approved Successfully!');
-        this.currentTab = 'active'; // Pindah tab agar admin lihat hasilnya
-      } catch(err) {
-        console.error(err);
-      }
+    if (this.currentTab === 'active') {
+      this.db.getActiveUsers().subscribe(data => {
+        this.allUsers = data;
+        this.applyFilter();
+      });
+    } else if (this.currentTab === 'pending') {
+      this.db.getPendingUsers().subscribe(data => {
+        this.allUsers = data;
+        this.applyFilter();
+      });
+    } else {
+      this.db.getDeletedUsers().subscribe(data => {
+        this.allUsers = data;
+        this.applyFilter();
+      });
     }
   }
 
-  // 2. Reject Mahasiswa
+  // Fungsi Ganti Tab
+  switchTab(tab: 'active' | 'pending' | 'deleted') {
+    this.currentTab = tab;
+    this.loadData();
+  }
+
+  // Fungsi Search Real-time
+  applyFilter() {
+    if (!this.searchTerm) {
+      this.filteredUsers = [...this.allUsers];
+    } else {
+      const term = this.searchTerm.toLowerCase();
+      this.filteredUsers = this.allUsers.filter(u =>
+        u.name.toLowerCase().includes(term) ||
+        u.studentId.toLowerCase().includes(term) ||
+        u.email.toLowerCase().includes(term)
+      );
+    }
+  }
+
+  // --- ACTIONS ---
+
+  async approveUser(user: User) {
+    if(!user.id) return;
+    if(confirm(`Approve registration for ${user.name}?`)) {
+      await this.db.approveUser(user.id);
+      // Data otomatis refresh karena subscription realtime
+    }
+  }
+
   async rejectUser(user: User) {
     if(!user.id) return;
     if(confirm(`Reject and delete request from ${user.name}?`)) {
@@ -68,20 +89,18 @@ export class ManageUsersComponent implements OnInit {
     }
   }
 
-  // 3. Deactivate User (Soft Delete)
-  async deleteUser(id: string | undefined) {
+  async deactivateUser(id: string | undefined) {
     if(!id) return;
-    if(confirm('Deactivate this user?')) {
+    if(confirm('Deactivate (Soft Delete) this user? They won\'t be able to login.')) {
       await this.db.softDeleteUser(id);
     }
   }
-  // 4. Recover Deleted User
+
   async recoverUser(id: string | undefined) {
     if(!id) return;
-    if(confirm('Recover this user account?')) {
+    if(confirm('Recover this user account? They will become Active again.')) {
       await this.db.recoverUser(id);
-      alert('User recovered successfully!');
-      this.currentTab = 'active'; // Pindah ke tab active untuk melihat hasilnya
+      this.switchTab('active'); // Pindah ke tab active untuk lihat hasil
     }
   }
 }

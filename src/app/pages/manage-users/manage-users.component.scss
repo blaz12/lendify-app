@@ -1,125 +1,101 @@
-.layout {
-  display: flex;
-  height: 100vh;
-  background-color: #f9fafb;
+/* --- Layout Global --- */
+.layout { display: flex; height: 100vh; width: 100vw; background-color: #f8fafc; overflow: hidden; }
+.content { flex: 1; padding: 2rem; overflow-y: auto; }
+
+.page-header { margin-bottom: 1.5rem; h2 { margin: 0; color: #1e293b; } p { margin: 4px 0 0; color: #64748b; } }
+
+/* --- CONTROLS BAR (Search & Tabs) --- */
+.controls-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1.5rem; gap: 20px;
+
+  @media (max-width: 768px) { flex-direction: column-reverse; align-items: stretch; }
 }
 
-.content {
-  flex: 1;
-  padding: 2rem;
-  overflow-y: auto;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-
-  h2 { color: #111827; margin: 0; }
-}
-
-.header-actions {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-// Styling untuk Tab Switch
-.tab-buttons {
-  background: #e0e7ff;
-  padding: 4px;
-  border-radius: 8px;
-  display: flex;
+/* Tabs Style */
+.tabs {
+  display: flex; gap: 8px; background: #e2e8f0; padding: 4px; border-radius: 10px; width: fit-content;
 
   button {
-    background: transparent;
-    border: none;
-    padding: 8px 16px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    border-radius: 6px;
-    color: #4338ca;
-    font-weight: 500;
-    transition: all 0.2s;
+    background: transparent; border: none; padding: 8px 16px; border-radius: 8px;
+    font-size: 0.9rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+
+    &:hover { color: #334155; background: rgba(255,255,255,0.5); }
 
     &.active {
-      background: #4338ca; // Warna Ungu Gelap saat aktif
-      color: white;
-      shadow: 0 1px 2px rgba(0,0,0,0.1);
+      background: white; color: #5d5fef; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
   }
 }
 
-.btn-add {
-  background-color: #5d5fef;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  &:hover { background-color: #4b4dce; }
-}
-
-// Styling Table (Sama seperti Manage Items)
-.table-container {
-  background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-
-  table {
-    width: 100%; border-collapse: collapse;
-
-    th {
-      text-align: left; padding: 1rem;
-      font-size: 0.75rem; text-transform: uppercase;
-      color: #6b7280; border-bottom: 1px solid #e5e7eb;
-    }
-
-    td {
-      padding: 1rem; border-bottom: 1px solid #f3f4f6;
-      color: #374151; font-size: 0.9rem;
-
-      &.font-medium { font-weight: 600; color: #1f2937; }
-      &.text-gray { color: #9ca3af; font-size: 0.85rem; }
-    }
-  }
-}
-
-// Tombol Aksi
-.btn-text {
-  background: none; border: none; font-size: 0.85rem; cursor: pointer; margin-right: 10px;
-  &.edit { color: #5d5fef; font-weight: 500; }
-  &.delete { color: #ef4444; }
-  &.recover { color: #10b981; font-weight: bold; } // Hijau untuk recover
-  &:hover { text-decoration: underline; }
-}
 .badge-count {
-  background: #ef4444; color: white; padding: 2px 8px;
-  border-radius: 12px; font-size: 0.75rem; margin-left: 6px;
+  background: #ef4444; color: white; font-size: 0.7rem; padding: 1px 6px; border-radius: 10px;
 }
 
-.btn-approve {
-  background: #10b981; color: white; border: none; padding: 6px 14px;
-  border-radius: 6px; font-weight: 600; cursor: pointer; margin-right: 8px; font-size: 0.85rem;
-  &:hover { background: #059669; }
+/* Search Box Style (Mirip Catalog) */
+.search-box {
+  position: relative; right: 2.6%; width: 300px;
+
+  i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+
+  input {
+    width: 100%; padding: 0.65rem 1rem 0.65rem 2.4rem;
+    border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 0.9rem;
+    &:focus { border-color: #5d5fef; box-shadow: 0 0 0 3px rgba(93, 95, 239, 0.1); }
+  }
+
+  @media (max-width: 768px) { width: 100%; }
 }
 
-.btn-reject {
-  background: #ef4444; color: white; border: none; padding: 6px 14px;
-  border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.85rem;
-  &:hover { background: #dc2626; }
+
+/* --- TABLE STYLES --- */
+.table-container {
+  background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 1rem 1.5rem; background: #f8fafc; font-size: 0.75rem; color: #64748b; border-bottom: 1px solid #e2e8f0; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; color: #334155; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
 }
 
-.info-box {
-  background: #eff6ff; color: #1e40af; padding: 12px; border-radius: 8px;
-  margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; font-size: 0.9rem;
+/* User Info (Avatar + Text) */
+.user-info {
+  display: flex; align-items: center; gap: 12px;
+
+  .avatar-small {
+    width: 36px; height: 36px; background: #e0e7ff; color: #4338ca;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9rem;
+  }
 }
-.btn-recover {
-  background: #3b82f6; color: white; border: none; padding: 6px 12px;
-  border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.8rem;
-  &:hover { background: #2563eb; }
+
+.font-bold { font-weight: 600; color: #1e293b; }
+.text-muted { color: #94a3b8; font-size: 0.8rem; }
+.id-badge { background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; color: #475569; }
+
+/* Status Badges */
+.badge {
+  padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+  &.badge-green { background: #dcfce7; color: #166534; }
+  &.badge-orange { background: #fff7ed; color: #c2410c; }
+  &.badge-red { background: #fee2e2; color: #991b1b; }
 }
-.empty-msg { padding: 2rem; text-align: center; color: #9ca3af; }
+
+/* Buttons */
+.btn-icon.delete { background: #fee2e2; color: #ef4444; border:none; width:32px; height:32px; border-radius:6px; cursor:pointer; &:hover{background:#fecaca;} }
+
+.action-group { display: flex; gap: 6px; justify-content: flex-end; }
+.btn-sm {
+  border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer;
+  &.btn-approve { background: #10b981; color: white; &:hover{background:#059669;} }
+  &.btn-reject { background: white; border:1px solid #ef4444; color:#ef4444; &:hover{background:#fef2f2;} }
+  &.btn-recover { background: #3b82f6; color: white; display: inline-flex; align-items: center; gap:5px; &:hover{background:#2563eb;} }
+}
+
+.empty-state {
+  text-align: center; padding: 3rem; color: #cbd5e1;
+  i { font-size: 2rem; margin-bottom: 0.5rem; }
+  p { margin: 0; font-size: 0.9rem; }
+}
+.text-right { text-align: right; }

@@ -16,17 +16,22 @@ export class BorrowReturnComponent implements OnInit {
   userRole: string = 'student';
   userName: string = '';
 
-  // Data
+  // Data Arrays
   myBorrowings: any[] = [];
   allHistory: any[] = [];
   activeLoans: any[] = [];
-  pendingRequests: any[] = []; // NEW: Daftar tunggu konfirmasi
+  pendingRequests: any[] = [];
 
-  // Tab Admin: active | requests | history
+  // Admin Tabs
   adminTab: 'active' | 'requests' | 'history' = 'active';
 
-  // Cache Item untuk cek stok
+  // Cache Items (untuk cek stok saat return)
   allItemsCache: any[] = [];
+
+  // [NEW] Modal Return State
+  isReturnModalOpen: boolean = false;
+  selectedLog: any = null;
+  returnCondition: string = 'Good'; // Default
 
   constructor(private db: DatabaseService) {}
 
@@ -34,74 +39,86 @@ export class BorrowReturnComponent implements OnInit {
     this.userRole = localStorage.getItem('demoRole') || 'student';
     this.userName = localStorage.getItem('userName') || 'User';
 
-    // Load Stok Barang untuk referensi pengembalian
+    // Load Items untuk stok referensi
     this.db.getItems().subscribe(items => this.allItemsCache = items);
 
     if (this.userRole === 'admin') {
-      // --- LOGIK ADMIN ---
       this.db.getAllBorrowings().subscribe(logs => {
-        // Sort Terbaru
-        const sortedLogs = logs.sort((a, b) => new Date(b.borrowDate).getTime() - new Date(a.borrowDate).getTime());
-
-        this.allHistory = sortedLogs;
-        this.activeLoans = sortedLogs.filter(log => log.status === 'Borrowed');
-        // Filter Pending
-        this.pendingRequests = sortedLogs.filter(log => log.status === 'Pending');
+        const sorted = this.processLogs(logs); // Proses Overdue dll
+        this.allHistory = sorted;
+        this.activeLoans = sorted.filter(log => log.status === 'Borrowed');
+        this.pendingRequests = sorted.filter(log => log.status === 'Pending');
       });
-
     } else {
-      // --- LOGIK STUDENT ---
       this.db.getActiveBorrowings().subscribe(logs => {
-        // Student melihat Pending, Borrowed, dan Returned miliknya
-        this.myBorrowings = logs
-          .filter(log => log.borrower === this.userName)
-          .sort((a, b) => new Date(b.borrowDate).getTime() - new Date(a.borrowDate).getTime());
+        const myLogs = logs.filter(log => log.borrower === this.userName);
+        this.myBorrowings = this.processLogs(myLogs);
       });
     }
   }
 
-  // --- ADMIN ACTIONS ---
+  // [NEW] Helper untuk proses data (hitung Overdue)
+  processLogs(logs: any[]) {
+    const today = new Date().getTime();
+    return logs.map(log => {
+      let isOverdue = false;
+      if (log.status === 'Borrowed' && log.dueDate) {
+        const due = new Date(log.dueDate).getTime();
+        if (today > due) isOverdue = true;
+      }
+      return { ...log, isOverdue };
+    }).sort((a, b) => new Date(b.requestDate || b.borrowDate).getTime() - new Date(a.requestDate || a.borrowDate).getTime());
+  }
+
+  // --- ACTIONS ---
 
   async approveRequest(log: any) {
     if(!confirm(`Approve loan for ${log.borrower}?`)) return;
-    try {
-      await this.db.approveBorrowRequest(log.id);
-      // alert('Approved!'); // Optional
-    } catch(e) { console.error(e); }
+    try { await this.db.approveBorrowRequest(log.id); } catch(e) { console.error(e); }
   }
 
   async rejectRequest(log: any) {
-    if(!confirm(`Reject request from ${log.borrower}? Stock will be restored.`)) return;
+    if(!confirm(`Reject request? Stock will be restored.`)) return;
     try {
-      // 1. Update Status jadi Rejected
       await this.db.rejectBorrowRequest(log);
-
-      // 2. Kembalikan Stok
       const item = this.allItemsCache.find(i => i.id === log.itemId);
       const currentStock = item ? item.stock : 0;
       await this.db.restoreStock(log.itemId, log.qty, currentStock);
-
-      alert('Request rejected and stock restored.');
     } catch(e) { console.error(e); }
   }
 
-  // --- GENERAL ACTIONS ---
+  // [NEW] Buka Modal Return
+  openReturnModal(log: any) {
+    this.selectedLog = log;
+    this.returnCondition = 'Good'; // Reset
+    this.isReturnModalOpen = true;
+  }
 
-  async processReturn(borrowLog: any, isForce: boolean = false) {
-    const message = isForce
-      ? `Force return item '${borrowLog.itemName}'?`
-      : `Return '${borrowLog.itemName}'?`;
+  closeReturnModal() {
+    this.isReturnModalOpen = false;
+    this.selectedLog = null;
+  }
 
-    if(!confirm(message)) return;
+  // [NEW] Submit Return dengan Kondisi
+  async submitReturn() {
+    if (!this.selectedLog) return;
 
-    const item = this.allItemsCache.find(i => i.id === borrowLog.itemId);
+    const item = this.allItemsCache.find(i => i.id === this.selectedLog.itemId);
     const currentStock = item ? item.stock : 0;
 
     try {
-        await this.db.returnItem(borrowLog.id, borrowLog.itemId, borrowLog.qty, currentStock);
-    } catch (e) { console.error(e); }
+        await this.db.returnItem(
+          this.selectedLog.id,
+          this.selectedLog.itemId,
+          this.selectedLog.qty,
+          currentStock,
+          this.returnCondition // Kirim kondisi
+        );
+        alert('Item returned successfully.');
+        this.closeReturnModal();
+    } catch (e) {
+        console.error(e);
+        alert('Error processing return.');
+    }
   }
-
-  returnItem(log: any) { this.processReturn(log, false); }
-  adminForceReturn(log: any) { this.processReturn(log, true); }
 }

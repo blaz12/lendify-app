@@ -1,73 +1,86 @@
-/* --- Layout Dasar --- */
-.layout { display: flex; height: 100vh; background-color: #f3f4f6; }
+/* ... (Style Global Sama seperti manage-items) ... */
+.layout { display: flex; height: 100vh; background: #f8fafc; }
 .content { flex: 1; padding: 2rem; overflow-y: auto; }
 
 .page-header {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;
-  h2 { margin: 0; color: #1f2937; }
-  p { margin: 0; color: #6b7280; font-size: 0.95rem; }
+  margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-start;
+  h2 { margin: 0; color: #1e293b; } p { margin: 5px 0 0; color: #64748b; }
 }
 
-/* --- Table Styles --- */
-.table-container {
-  background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden;
-
-  table { width: 100%; border-collapse: collapse; }
-  th { text-align: left; padding: 1rem; background: #f9fafb; border-bottom: 1px solid #e5e7eb; font-size: 0.85rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; }
-  td { padding: 1rem; border-bottom: 1px solid #f3f4f6; color: #374151; vertical-align: middle; }
-
-  .font-medium { font-weight: 600; color: #111827; }
-  .text-muted { color: #9ca3af; font-size: 0.85rem; }
-  .empty-msg { padding: 3rem; color: #9ca3af; font-style: italic; }
-}
-
-/* --- Badges & Buttons --- */
-.badge {
-  padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
-  &.badge-orange { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
-  &.badge-green { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-}
-
-.text-green { color: #16a34a; font-weight: 600; font-size: 0.85rem; }
-
-.btn-return {
-  background: white; border: 1px solid #d1d5db; color: #374151; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;
-  &:hover { background: #f3f4f6; border-color: #9ca3af; }
-}
-
-/* --- ADMIN TAB STYLES --- */
+/* Tab Buttons */
 .tab-buttons {
-  display: flex; gap: 8px; background: #e0e7ff; padding: 4px; border-radius: 8px;
-
+  display: flex; gap: 8px; background: #e2e8f0; padding: 4px; border-radius: 8px;
   button {
-    background: transparent; border: none; padding: 8px 16px; border-radius: 6px;
-    font-weight: 600; color: #4338ca; cursor: pointer; transition: all 0.2s; font-size: 0.9rem;
-
-    &.active {
-      background: #4338ca; color: white;
-      box-shadow: 0 2px 4px rgba(67, 56, 202, 0.2);
-    }
-
-    &:hover:not(.active) { background: rgba(255,255,255,0.5); }
+    border: none; background: transparent; padding: 8px 16px; border-radius: 6px; font-weight: 600; color: #64748b; cursor: pointer;
+    &.active { background: white; color: #5d5fef; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
   }
 }
+.badge-count { background: #ef4444; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; margin-left: 5px; }
+.bg-blue { background: #3b82f6; }
 
-.badge-count {
-  background: #ef4444; color: white; padding: 1px 7px; border-radius: 10px; font-size: 0.7rem; margin-left: 6px; vertical-align: middle;
+/* Table Styles */
+.table-container {
+  background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden;
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 1rem; background: #f8fafc; color: #64748b; font-size: 0.75rem; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+  td { padding: 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #334155; }
 }
 
-/* --- Audit Info Box --- */
-.audit-info {
-  padding: 12px 16px; background: #f0fdf4; color: #166534; font-size: 0.9rem;
-  border-bottom: 1px solid #dcfce7; display: flex; align-items: center; gap: 8px;
-  i { color: #16a34a; font-size: 1rem; }
+.font-medium { font-weight: 600; color: #1e293b; }
+.text-muted { color: #94a3b8; font-size: 0.8rem; }
+.qty-badge { background: #e0e7ff; color: #4338ca; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-left: 5px; }
+
+/* Date Range Display */
+.date-range {
+  display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
+  i { color: #94a3b8; font-size: 0.8rem; }
 }
-/* ... CSS LAMA ... */
-.badge-grey { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
-.badge-red { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-.bg-blue { background: #3b82f6 !important; }
 
-.btn-approve { background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin-right: 5px; font-weight: 600; }
-.btn-reject { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+/* OVERDUE STYLES */
+.row-overdue {
+  background-color: #fef2f2; /* Merah Sangat Tipis */
+  td { border-bottom-color: #fee2e2; }
+}
+.tag-late {
+  background: #ef4444; color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 8px;
+}
 
-.audit-info.warn { background: #fff7ed; color: #c2410c; border-bottom: 1px solid #ffedd5; i { color: #ea580c; } }
+/* Status Badges */
+.badge {
+  padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+  &.badge-orange { background: #fff7ed; color: #c2410c; }
+  &.badge-green { background: #dcfce7; color: #166534; }
+  &.badge-grey { background: #f1f5f9; color: #475569; }
+  &.badge-red { background: #fee2e2; color: #991b1b; }
+}
+
+/* Condition Badge */
+.cond-badge {
+  font-size: 0.8rem; font-weight: 600;
+  &.good { color: #16a34a; }
+  &.bad { color: #dc2626; }
+}
+
+/* Buttons */
+.btn-sm {
+  border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-right: 5px;
+  &.btn-approve { background: #10b981; color: white; }
+  &.btn-reject { background: white; border: 1px solid #ef4444; color: #ef4444; }
+  &.btn-return { background: white; border: 1px solid #3b82f6; color: #3b82f6; &:hover{background:#eff6ff;} }
+}
+
+/* MODAL STYLES */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); z-index: 9999;
+  display: flex; justify-content: center; align-items: center;
+}
+.modal-content {
+  background: white; width: 400px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); overflow: hidden;
+  .modal-header { padding: 1.5rem; border-bottom: 1px solid #e2e8f0; display:flex; justify-content:space-between; h3{margin:0;} .close-btn{background:none; border:none; font-size:1.5rem; cursor:pointer;} }
+  .modal-body { padding: 1.5rem; }
+  .modal-footer { padding: 1rem 1.5rem; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: right; }
+}
+.form-group { margin-bottom: 1rem; label {display:block; margin-bottom:0.5rem; font-weight:600;} .form-control {width:100%; padding:0.75rem; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;} }
+.btn-save { background: #5d5fef; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer; }
+.btn-secondary { background: white; border: 1px solid #cbd5e1; color: #475569; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer; margin-right: 10px; }
