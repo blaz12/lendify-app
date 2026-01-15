@@ -1,73 +1,83 @@
 <div class="layout">
   <app-sidebar></app-sidebar>
-
   <main class="content">
-
     <header class="page-header">
       <div>
         <h2>{{ userRole === 'admin' ? 'Inventory Management' : 'Equipment Catalog' }}</h2>
         <p *ngIf="userRole === 'admin'">Add, edit, and track your physical assets.</p>
         <p *ngIf="userRole === 'student'">Browse items and make borrowing requests.</p>
       </div>
-
       <div class="header-actions">
-
-        <button *ngIf="userRole === 'admin'" class="btn-primary" (click)="showForm = true">
-          <i class="fas fa-plus"></i> Add New Item
-        </button>
-
-        <button *ngIf="userRole === 'student'" class="btn-primary-large" (click)="openBorrowModal()">
-           <i class="fas fa-cart-plus"></i> Create Borrow Request
-        </button>
-
+        <button *ngIf="userRole === 'admin'" class="btn-primary" (click)="showForm = true"><i class="fas fa-plus"></i> Add New Item</button>
+        <button *ngIf="userRole === 'student'" class="btn-primary-large" (click)="openBorrowModal()"><i class="fas fa-cart-plus"></i> Create Borrow Request</button>
       </div>
     </header>
+
+    <div class="filters-bar">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search item name..." [(ngModel)]="searchTerm" (input)="applyFilters()">
+      </div>
+
+      <div class="filter-box">
+        <i class="fas fa-filter"></i>
+        <select [(ngModel)]="selectedCategory" (change)="applyFilters()">
+          <option value="All">All Categories</option>
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+
+      <button class="btn-reset" *ngIf="searchTerm || selectedCategory !== 'All'" (click)="clearFilters()">
+        Reset
+      </button>
+    </div>
 
     <div class="table-container">
       <table>
         <thead>
           <tr>
-            <th width="30%">Item Name</th>
-            <th>Category</th>
-            <th>Stock</th>
+            <th width="35%" class="sortable" (click)="onSort('name')">
+              Item Name
+              <i class="fas" [ngClass]="{'fa-sort': sortColumn !== 'name', 'fa-sort-up': sortColumn === 'name' && sortDirection === 'asc', 'fa-sort-down': sortColumn === 'name' && sortDirection === 'desc'}"></i>
+            </th>
+            <th class="sortable" (click)="onSort('category')">
+              Category
+              <i class="fas" [ngClass]="{'fa-sort': sortColumn !== 'category', 'fa-sort-up': sortColumn === 'category' && sortDirection === 'asc', 'fa-sort-down': sortColumn === 'category' && sortDirection === 'desc'}"></i>
+            </th>
+            <th class="sortable" (click)="onSort('stock')">
+              Stock
+              <i class="fas" [ngClass]="{'fa-sort': sortColumn !== 'stock', 'fa-sort-up': sortColumn === 'stock' && sortDirection === 'asc', 'fa-sort-down': sortColumn === 'stock' && sortDirection === 'desc'}"></i>
+            </th>
             <th>Location</th>
             <th>Status</th>
             <th *ngIf="userRole === 'admin'" class="text-right">Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of items">
+          <tr *ngFor="let item of filteredItems">
             <td>
-              <span class="item-name">{{ item.name }}</span>
+              <div class="item-name-wrapper">
+                <span class="item-name">{{ item.name }}</span>
+                <div class="image-tooltip" *ngIf="item.imageUrl">
+                  <img [src]="item.imageUrl" alt="Preview" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+                </div>
+              </div>
             </td>
             <td><span class="category-tag">{{ item.category }}</span></td>
-            <td>
-               <span [class.text-danger]="item.stock === 0" style="font-weight: 600;">
-                 {{ item.stock }}
-               </span>
-            </td>
+            <td><span [class.text-danger]="item.stock === 0" style="font-weight: 600;">{{ item.stock }}</span></td>
             <td>{{ item.location }}</td>
-            <td>
-              <span class="badge" [ngClass]="item.stock > 0 ? 'available' : 'out'">
-                {{ item.stock > 0 ? 'Available' : 'Out of Stock' }}
-              </span>
-            </td>
-
+            <td><span class="badge" [ngClass]="item.stock > 0 ? 'available' : 'out'">{{ item.stock > 0 ? 'Available' : 'Out of Stock' }}</span></td>
             <td *ngIf="userRole === 'admin'" class="text-right">
-              <button class="btn-icon delete" (click)="deleteItem(item.id)" title="Delete Item">
-                <i class="fas fa-trash-alt"></i>
-              </button>
+              <button class="btn-icon delete" (click)="deleteItem(item.id)"><i class="fas fa-trash-alt"></i></button>
             </td>
           </tr>
 
-          <tr *ngIf="items.length === 0">
+          <tr *ngIf="filteredItems.length === 0">
             <td colspan="6" class="empty-state">
               <div class="empty-content">
-                <i class="fas fa-box-open"></i>
-                <p>No inventory items found.</p>
-                <button *ngIf="userRole === 'admin'" class="btn-link" (click)="showForm = true">
-                  + Add your first item
-                </button>
+                <i class="fas fa-search"></i>
+                <p>No items found matching your filter.</p>
+                <button class="btn-link" (click)="clearFilters()">Clear Filters</button>
               </div>
             </td>
           </tr>
@@ -76,121 +86,55 @@
     </div>
 
     <div class="modal-overlay" *ngIf="showForm && userRole === 'admin'">
-      <div class="modal-content"> <div class="modal-header">
-          <h3>Input New Inventory</h3>
-          <button class="close-btn" (click)="showForm = false">&times;</button>
-        </div>
-
+      <div class="modal-content">
+        <div class="modal-header"><h3>Input New Inventory</h3><button class="close-btn" (click)="showForm = false">&times;</button></div>
         <div class="modal-body">
           <div class="form-grid">
-
+            <div class="form-group full-width"><label>Item Name <span class="req">*</span></label><input [(ngModel)]="newItem.name" class="form-control" placeholder="e.g. MacBook Pro"></div>
             <div class="form-group full-width">
-              <label>Item Name <span class="req">*</span></label>
-              <input [(ngModel)]="newItem.name" class="form-control" placeholder="e.g. MacBook Pro M2">
+              <label>Image URL (Optional)</label>
+              <input [(ngModel)]="newItem.imageUrl" class="form-control" placeholder="https://example.com/image.jpg">
             </div>
-
             <div class="form-group">
               <label>Category</label>
               <select [(ngModel)]="newItem.category" class="form-control">
-                <option value="Laptop">Laptop</option>
-                <option value="Camera">Camera</option>
-                <option value="Audio">Audio</option>
-                <option value="Projector">Projector</option>
-                <option value="Accessory">Accessory</option>
-                <option value="Other">Other</option>
+                 <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
               </select>
             </div>
-
-            <div class="form-group">
-              <label>Stock Quantity <span class="req">*</span></label>
-              <input [(ngModel)]="newItem.stock" type="number" min="0" class="form-control" placeholder="0">
-            </div>
-
-            <div class="form-group full-width">
-              <label>Storage Location <span class="req">*</span></label>
-              <input [(ngModel)]="newItem.location" class="form-control" placeholder="e.g. Cabinet A, Room 101">
-            </div>
-
+            <div class="form-group"><label>Stock <span class="req">*</span></label><input [(ngModel)]="newItem.stock" type="number" min="0" class="form-control"></div>
+            <div class="form-group full-width"><label>Location <span class="req">*</span></label><input [(ngModel)]="newItem.location" class="form-control" placeholder="e.g. Cabinet A"></div>
           </div>
         </div>
-
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="showForm = false">Cancel</button>
-          <button class="btn-save" (click)="saveRealItem()" [disabled]="isSaving">
-            <i class="fas fa-save"></i> {{ isSaving ? 'Saving...' : 'Save Item' }}
-          </button>
-        </div>
-
+        <div class="modal-footer"><button class="btn-secondary" (click)="showForm = false">Cancel</button><button class="btn-save" (click)="saveRealItem()" [disabled]="isSaving">Save Item</button></div>
       </div>
     </div>
 
     <div class="modal-overlay" *ngIf="isModalOpen">
-      <div class="modal-content large-modal"> <div class="modal-header">
-          <h3>Create Borrow Request</h3>
-          <button class="close-btn" (click)="closeModal()">&times;</button>
-        </div>
-
+      <div class="modal-content large-modal">
+        <div class="modal-header"><h3>Create Borrow Request</h3><button class="close-btn" (click)="closeModal()">&times;</button></div>
         <div class="modal-body">
-
           <div class="form-grid">
-            <div class="form-group">
-              <label>Usage Location</label>
-              <select [(ngModel)]="borrowRequest.location" class="form-control">
-                <option value="" disabled selected>Select location...</option>
-                <option value="Classroom 101">Classroom 101</option>
-                <option value="Lab Computer">Lab Computer</option>
-                <option value="Auditorium">Auditorium</option>
-                <option value="Meeting Room">Meeting Room</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Purpose / Event</label>
-              <input type="text" [(ngModel)]="borrowRequest.purpose" class="form-control" placeholder="e.g. Final Project">
-            </div>
+            <div class="form-group full-width"><label>Location</label><input [(ngModel)]="borrowRequest.location" class="form-control" placeholder="Room 101"></div>
+            <div class="form-group"><label>Start Date</label><input type="date" [(ngModel)]="borrowRequest.startDate" [min]="minDate" class="form-control"></div>
+            <div class="form-group"><label>Return Date</label><input type="date" [(ngModel)]="borrowRequest.endDate" [min]="borrowRequest.startDate" class="form-control"></div>
+            <div class="form-group full-width"><label>Purpose</label><input [(ngModel)]="borrowRequest.purpose" class="form-control"></div>
           </div>
-
           <h4 class="section-title">Select Items</h4>
           <div class="item-select-container">
             <table>
-              <thead>
-                <tr>
-                  <th>ITEM</th>
-                  <th>AVAIL</th>
-                  <th width="100">QUANTITY</th>
-                </tr>
-              </thead>
+              <thead><tr><th>ITEM</th><th>AVAIL</th><th width="100">QTY</th></tr></thead>
               <tbody>
                 <tr *ngFor="let item of items" [class.selected-row]="item.requestQty > 0">
-                  <td class="font-medium">
-                    {{ item.name }}
-                    <div class="text-muted small">{{ item.category }}</div>
-                  </td>
+                  <td class="font-medium">{{ item.name }} <div class="text-muted small">{{ item.category }}</div></td>
                   <td>{{ item.stock }}</td>
-                  <td>
-                    <input type="number" min="0" [max]="item.stock"
-                           [(ngModel)]="item.requestQty"
-                           [disabled]="item.stock === 0"
-                           class="form-control qty-input">
-                  </td>
-                </tr>
-                <tr *ngIf="items.length === 0">
-                    <td colspan="3" class="text-center p-4 text-muted">No items available to borrow.</td>
+                  <td><input type="number" min="0" [max]="item.stock" [(ngModel)]="item.requestQty" [disabled]="item.stock === 0" class="form-control qty-input"></td>
                 </tr>
               </tbody>
             </table>
           </div>
-
         </div>
-
-        <div class="modal-footer">
-          <button class="btn-secondary" (click)="closeModal()">Cancel</button>
-          <button class="btn-save" (click)="submitBorrow()" [disabled]="isSubmitting">
-             {{ isSubmitting ? 'Submitting...' : 'Confirm Request' }}
-          </button>
-        </div>
-
+        <div class="modal-footer"><button class="btn-secondary" (click)="closeModal()">Cancel</button><button class="btn-save" (click)="submitBorrow()" [disabled]="isSubmitting">Confirm</button></div>
       </div>
     </div>
-
   </main>
 </div>

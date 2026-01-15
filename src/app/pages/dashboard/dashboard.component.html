@@ -1,6 +1,5 @@
 <div class="layout">
   <app-sidebar></app-sidebar>
-
   <main class="content">
 
     <header class="dashboard-header">
@@ -8,74 +7,60 @@
         <h1>Hello, {{ userName }}! 👋</h1>
         <p>Dashboard Overview</p>
       </div>
-      <div class="clock-badge">
-        <i class="far fa-clock"></i>
-        <span>{{ now | date:'EEE, d MMM • HH:mm:ss' }}</span>
-      </div>
+      <div class="clock-badge"><i class="far fa-clock"></i><span>{{ now | date:'EEE, d MMM • HH:mm:ss' }}</span></div>
     </header>
+
+    <div class="alert-section" *ngIf="overdueItems.length > 0">
+      <div class="alert-card warning" *ngFor="let item of overdueItems">
+        <div class="alert-icon"><i class="fas fa-exclamation-circle"></i></div>
+        <div class="alert-content">
+          <strong>Due Date Alert:</strong>
+          Item '{{ item.itemName }}' ({{ item.qty }} pcs)
+          <span *ngIf="item.daysLeft > 0">is due in {{ item.daysLeft }} day(s).</span>
+          <span *ngIf="item.daysLeft === 0">is due TODAY.</span>
+          <span *ngIf="item.daysLeft < 0">is OVERDUE by {{ item.daysLeft * -1 }} day(s)!</span>
+        </div>
+        <div class="alert-action" *ngIf="userRole === 'admin' || userRole === 'student'">
+          <a routerLink="/borrow-return" class="btn-xs">Check</a>
+        </div>
+      </div>
+    </div>
 
     <div class="stats-grid">
       <div class="stat-card blue clickable" [class.active]="activeCard === 'total'" (click)="toggleCard('total')">
         <div class="card-top">
           <div class="icon-wrapper"><i class="fas fa-cubes"></i></div>
-          <div class="stat-info">
-            <h3>Total Inventory</h3>
-            <div class="number">{{ totalAvailableCount + totalBorrowedCount }}</div>
-            <small>Click for details <i class="fas fa-chevron-down toggle-icon"></i></small>
-          </div>
+          <div class="stat-info"><h3>Total Inventory</h3><div class="number">{{ totalAvailableCount + totalBorrowedCount }}</div><small>Details <i class="fas fa-chevron-down toggle-icon"></i></small></div>
         </div>
         <div class="card-details" *ngIf="activeCard === 'total'" (click)="$event.stopPropagation()">
-          <h4>All Inventory Items</h4>
-          <div class="mini-table-container">
-            <table>
-              <thead><tr><th>Item</th><th>Category</th><th>Stock</th></tr></thead>
-              <tbody>
-                <tr *ngFor="let item of allItems"><td>{{ item.name }}</td><td>{{ item.category }}</td><td>{{ item.stock }}</td></tr>
-              </tbody>
-            </table>
-          </div>
+          <h4>All Items</h4>
+          <div class="mini-table-container"><table><thead><tr><th>Item</th><th>Cat</th><th>Stock</th></tr></thead><tbody><tr *ngFor="let item of allItems"><td>{{ item.name }}</td><td>{{ item.category }}</td><td>{{ item.stock }}</td></tr></tbody></table></div>
         </div>
       </div>
 
       <div class="stat-card green clickable" [class.active]="activeCard === 'available'" (click)="toggleCard('available')">
         <div class="card-top">
           <div class="icon-wrapper"><i class="fas fa-check"></i></div>
-          <div class="stat-info">
-            <h3>Available Stock</h3>
-            <div class="number">{{ totalAvailableCount }}</div>
-            <small>Ready to borrow <i class="fas fa-chevron-down toggle-icon"></i></small>
-          </div>
+          <div class="stat-info"><h3>Available</h3><div class="number">{{ totalAvailableCount }}</div><small>Ready <i class="fas fa-chevron-down toggle-icon"></i></small></div>
         </div>
         <div class="card-details" *ngIf="activeCard === 'available'" (click)="$event.stopPropagation()">
-          <h4>Available Items</h4>
-          <div class="mini-table-container">
-            <table>
-              <thead><tr><th>Item</th><th>Location</th><th>Qty</th></tr></thead>
-              <tbody>
-                <tr *ngFor="let item of availableItems"><td>{{ item.name }}</td><td>{{ item.location }}</td><td class="text-green font-bold">{{ item.stock }}</td></tr>
-              </tbody>
-            </table>
-          </div>
+          <h4>Ready Stock</h4>
+          <div class="mini-table-container"><table><thead><tr><th>Item</th><th>Loc</th><th>Qty</th></tr></thead><tbody><tr *ngFor="let item of availableItems"><td>{{ item.name }}</td><td>{{ item.location }}</td><td class="text-green font-bold">{{ item.stock }}</td></tr></tbody></table></div>
         </div>
       </div>
 
       <div class="stat-card orange clickable" [class.active]="activeCard === 'loan'" (click)="toggleCard('loan')">
         <div class="card-top">
           <div class="icon-wrapper"><i class="fas fa-hand-holding-heart"></i></div>
-          <div class="stat-info">
-            <h3>On Loan</h3>
-            <div class="number">{{ totalBorrowedCount }}</div>
-            <small>Currently out <i class="fas fa-chevron-down toggle-icon"></i></small>
-          </div>
+          <div class="stat-info"><h3>On Loan</h3><div class="number">{{ totalBorrowedCount }}</div><small>Active <i class="fas fa-chevron-down toggle-icon"></i></small></div>
         </div>
         <div class="card-details" *ngIf="activeCard === 'loan'" (click)="$event.stopPropagation()">
           <h4>Active Loans</h4>
           <div class="mini-table-container">
-            <table *ngIf="activeLoans.length > 0; else noLoans">
-              <thead><tr><th>Item</th><th>Borrower</th><th>Date</th></tr></thead>
-              <tbody>
-                <tr *ngFor="let log of activeLoans"><td>{{ log.itemName }}</td><td>{{ log.borrower }}</td><td>{{ log.borrowDate | date:'dd/MM' }}</td></tr>
-              </tbody>
+            <table *ngIf="activeLoans.length > 0; else noLoans"><thead><tr><th>Item</th><th>User</th><th>Due</th></tr></thead>
+              <tbody><tr *ngFor="let log of activeLoans"><td>{{ log.itemName }}</td><td>{{ log.borrower }}</td>
+                <td [class.text-red]="log.daysLeft <= 0">{{ log.dueDate | date:'dd/MM' }}</td>
+              </tr></tbody>
             </table>
             <ng-template #noLoans><p class="empty-text">No active loans.</p></ng-template>
           </div>
@@ -85,98 +70,37 @@
       <div class="stat-card red clickable" *ngIf="userRole === 'admin'" [class.active]="activeCard === 'low'" (click)="toggleCard('low')">
         <div class="card-top">
           <div class="icon-wrapper"><i class="fas fa-bell"></i></div>
-          <div class="stat-info">
-            <h3>Low Stock</h3>
-            <div class="number">{{ lowStockItems.length }}</div>
-            <small>Needs restock <i class="fas fa-chevron-down toggle-icon"></i></small>
-          </div>
+          <div class="stat-info"><h3>Low Stock</h3><div class="number">{{ lowStockItems.length }}</div><small>Alerts <i class="fas fa-chevron-down toggle-icon"></i></small></div>
         </div>
         <div class="card-details" *ngIf="activeCard === 'low'" (click)="$event.stopPropagation()">
-          <h4>Low Stock Alerts</h4>
-          <div class="mini-table-container">
-            <table *ngIf="lowStockItems.length > 0; else noLowStock">
-              <thead><tr><th>Item</th><th>Stock</th><th>Action</th></tr></thead>
-              <tbody>
-                <tr *ngFor="let item of lowStockItems"><td>{{ item.name }}</td><td class="text-red font-bold">{{ item.stock }}</td><td><a routerLink="/items" class="link-sm">Restock</a></td></tr>
-              </tbody>
-            </table>
-            <ng-template #noLowStock><p class="empty-text">Stock levels are good.</p></ng-template>
-          </div>
+          <h4>Restock Needed</h4>
+          <div class="mini-table-container"><table *ngIf="lowStockItems.length > 0; else noLow"><thead><tr><th>Item</th><th>Qty</th><th>Act</th></tr></thead><tbody><tr *ngFor="let item of lowStockItems"><td>{{ item.name }}</td><td class="text-red font-bold">{{ item.stock }}</td><td><a routerLink="/items" class="link-sm">Add</a></td></tr></tbody></table><ng-template #noLow><p class="empty-text">Stock good.</p></ng-template></div>
         </div>
       </div>
     </div>
 
     <div class="dashboard-widgets-grid">
-
       <div class="widget-card large">
-        <div class="widget-header">
-          <h3><i class="fas fa-history"></i> Recent Activity</h3>
-          <a routerLink="/borrow-return" class="link-sm">View All</a>
-        </div>
+        <div class="widget-header"><h3><i class="fas fa-history"></i> Recent Activity</h3><a routerLink="/borrow-return" class="link-sm">View All</a></div>
         <div class="widget-body table-responsive">
-          <table *ngIf="userRole === 'admin'">
-            <thead><tr><th>Item</th><th>User</th><th>Status</th><th>Time</th></tr></thead>
-            <tbody>
-              <tr *ngFor="let log of recentLogs">
-                <td class="font-medium">{{ log.itemName }}</td>
-                <td>{{ log.borrower }}</td>
-                <td><span class="badge" [ngClass]="{'badge-orange': log.status=='Borrowed', 'badge-green': log.status=='Returned', 'badge-grey': log.status=='Pending', 'badge-red': log.status=='Rejected'}">{{ log.status }}</span></td>
-                <td class="text-muted small">{{ log.borrowDate | date:'shortTime' }}</td>
-              </tr>
-              <tr *ngIf="recentLogs.length === 0"><td colspan="4" class="text-center text-muted">No recent activity.</td></tr>
-            </tbody>
-          </table>
-
-          <table *ngIf="userRole === 'student'">
-            <thead><tr><th>Item</th><th>Qty</th><th>Status</th><th>Date</th></tr></thead>
-            <tbody>
-              <tr *ngFor="let log of myActiveLoans.slice(0,5)">
-                <td class="font-medium">{{ log.itemName }}</td>
-                <td>{{ log.qty }}</td>
-                <td><span class="badge" [ngClass]="{'badge-orange': log.status=='Borrowed', 'badge-green': log.status=='Returned', 'badge-grey': log.status=='Pending'}">{{ log.status }}</span></td>
-                <td class="text-muted small">{{ log.borrowDate | date:'dd MMM' }}</td>
-              </tr>
-              <tr *ngIf="myActiveLoans.length === 0"><td colspan="4" class="text-center text-muted">No active loans found.</td></tr>
-            </tbody>
-          </table>
+          <table *ngIf="userRole === 'admin'"><thead><tr><th>Item</th><th>User</th><th>Status</th><th>Time</th></tr></thead><tbody><tr *ngFor="let log of recentLogs"><td class="font-medium">{{ log.itemName }}</td><td>{{ log.borrower }}</td><td><span class="badge" [ngClass]="{'badge-orange': log.status=='Borrowed', 'badge-green': log.status=='Returned', 'badge-grey': log.status=='Pending', 'badge-red': log.status=='Rejected'}">{{ log.status }}</span></td><td class="text-muted small">{{ log.borrowDate | date:'shortTime' }}</td></tr><tr *ngIf="recentLogs.length === 0"><td colspan="4" class="text-center text-muted">No activity.</td></tr></tbody></table>
+          <table *ngIf="userRole === 'student'"><thead><tr><th>Item</th><th>Qty</th><th>Status</th><th>Date</th></tr></thead><tbody><tr *ngFor="let log of myActiveLoans.slice(0,5)"><td class="font-medium">{{ log.itemName }}</td><td>{{ log.qty }}</td><td><span class="badge" [ngClass]="{'badge-orange': log.status=='Borrowed', 'badge-green': log.status=='Returned', 'badge-grey': log.status=='Pending'}">{{ log.status }}</span></td><td class="text-muted small">{{ log.borrowDate | date:'dd MMM' }}</td></tr><tr *ngIf="myActiveLoans.length === 0"><td colspan="4" class="text-center text-muted">No active loans.</td></tr></tbody></table>
         </div>
       </div>
-
       <div class="widget-card side">
-        <div class="widget-header">
-          <h3><i class="fas fa-bolt text-yellow"></i> Quick Actions</h3>
-        </div>
+        <div class="widget-header"><h3><i class="fas fa-bolt text-yellow"></i> Quick Actions</h3></div>
         <div class="widget-body p-3">
-
           <div class="quick-actions" *ngIf="userRole === 'admin'">
-            <a routerLink="/items" class="action-btn purple">
-              <div class="icon"><i class="fas fa-plus"></i></div>
-              <span>Add Item</span>
-            </a>
-            <a routerLink="/borrow-return" class="action-btn blue">
-              <div class="icon"><i class="fas fa-clipboard-check"></i></div>
-              <span>Verify Requests</span>
-            </a>
-            <a routerLink="/users" class="action-btn green">
-              <div class="icon"><i class="fas fa-user-plus"></i></div>
-              <span>Approve Users</span>
-            </a>
+            <a routerLink="/items" class="action-btn purple"><div class="icon"><i class="fas fa-plus"></i></div><span>Add Item</span></a>
+            <a routerLink="/borrow-return" class="action-btn blue"><div class="icon"><i class="fas fa-clipboard-check"></i></div><span>Verify Requests</span></a>
+            <a routerLink="/users" class="action-btn green"><div class="icon"><i class="fas fa-user-plus"></i></div><span>Approve Users</span></a>
           </div>
-
           <div class="quick-actions" *ngIf="userRole === 'student'">
-            <a routerLink="/items" class="action-btn purple">
-              <div class="icon"><i class="fas fa-search"></i></div>
-              <span>Browse Catalog</span>
-            </a>
-            <a routerLink="/borrow-return" class="action-btn blue">
-              <div class="icon"><i class="fas fa-history"></i></div>
-              <span>My History</span>
-            </a>
+            <a routerLink="/items" class="action-btn purple"><div class="icon"><i class="fas fa-search"></i></div><span>Browse Catalog</span></a>
+            <a routerLink="/borrow-return" class="action-btn blue"><div class="icon"><i class="fas fa-history"></i></div><span>My History</span></a>
           </div>
-
         </div>
       </div>
-
     </div>
 
   </main>

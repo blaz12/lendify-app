@@ -183,3 +183,17 @@
     }
   }
 }
+/* Alert Section */
+.alert-section {
+  margin-bottom: 2rem;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.alert-card {
+  background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid #f97316;
+  padding: 1rem; border-radius: 8px; display: flex; align-items: center; gap: 15px;
+  color: #7c2d12;
+
+  .alert-icon { font-size: 1.2rem; color: #f97316; }
+  .alert-content { flex: 1; font-size: 0.9rem; }
+  .btn-xs { background: white; border: 1px solid #fdba74; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; text-decoration: none; color: #c2410c; font-weight: 600; &:hover{background: #fff7ed;} }
+}

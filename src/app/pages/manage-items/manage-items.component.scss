@@ -148,3 +148,195 @@
   0% { opacity: 0; transform: scale(0.95) translateY(10px); }
   100% { opacity: 1; transform: scale(1) translateY(0); }
 }
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #f1f5f9;
+    color: #374151;
+  }
+
+  i {
+    margin-left: 5px;
+    font-size: 0.8em;
+    color: #9ca3af;
+  }
+}
+
+/* [UPDATE] IMAGE PREVIEW TOOLTIP */
+.item-name-wrapper {
+  position: relative; /* Penting untuk parent absolute child */
+  display: inline-block;
+  cursor: help; /* Memberi hint bahwa ini bisa di-hover */
+
+  .item-name {
+    font-weight: 600; color: #111827;
+    border-bottom: 1px dashed #cbd5e1; /* Garis putus-putus halus di bawah nama */
+  }
+
+  /* Tooltip Container */
+  .image-tooltip {
+    display: none; /* Sembunyi default */
+    position: absolute;
+    left: 100%; /* Muncul di sebelah kanan teks */
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 15px;
+    z-index: 100;
+
+    background: white;
+    padding: 6px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+
+    /* Panah kecil ke arah teks */
+    &::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: 100%;
+      margin-top: -6px;
+      border-width: 6px;
+      border-style: solid;
+      border-color: transparent white transparent transparent;
+    }
+
+    img {
+      display: block;
+      max-width: 150px; /* Ukuran preview */
+      max-height: 150px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+  }
+
+  /* Tampilkan saat Hover */
+  &:hover .image-tooltip {
+    display: block;
+    animation: fadeIn 0.2s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-50%) scale(0.95); }
+  to { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+
+.text-muted { color: #94a3b8; font-size: 0.8rem; }
+/* [NEW] FILTERS BAR STYLING */
+.filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+
+  /* Search Box */
+  .search-box {
+    flex: 2; /* Lebar lebih dominan */
+    position: relative;
+
+    i {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: #9ca3af; font-size: 0.9rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem; /* Padding kiri buat icon */
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+      box-sizing: border-box; /* Agar padding tidak merusak lebar */
+
+      &:focus {
+        border-color: #5d5fef;
+        box-shadow: 0 0 0 3px rgba(93, 95, 239, 0.1);
+      }
+    }
+  }
+
+  /* Filter Dropdown */
+  .filter-box {
+    flex: 1;
+    position: relative;
+
+    i {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: #9ca3af; font-size: 0.9rem; pointer-events: none;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      background: white;
+      cursor: pointer;
+      appearance: none; /* Hilangkan panah default browser */
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      background-size: 1em;
+
+      &:focus { border-color: #5d5fef; }
+    }
+  }
+
+  /* Reset Button */
+  .btn-reset {
+    padding: 0.75rem 1.25rem;
+    background: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover { background: #e5e7eb; color: #1f2937; }
+  }
+}
+
+/* Responsif untuk Mobile */
+@media (max-width: 768px) {
+  .filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+
+    .search-box, .filter-box, .btn-reset {
+      width: 100%;
+    }
+  }
+}
+
+th.sortable {
+  cursor: pointer; user-select: none; transition: background 0.2s;
+  &:hover { background: #f1f5f9; color: #374151; }
+  i { margin-left: 5px; font-size: 0.8em; color: #9ca3af; }
+}
+
+.item-name-wrapper {
+  position: relative; display: inline-block; cursor: help;
+  .item-name { font-weight: 600; color: #111827; border-bottom: 1px dashed #cbd5e1; }
+  .image-tooltip {
+    display: none; position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
+    margin-left: 15px; z-index: 100; background: white; padding: 6px; border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2); border: 1px solid #e2e8f0;
+    &::before { content: ""; position: absolute; top: 50%; right: 100%; margin-top: -6px; border-width: 6px; border-style: solid; border-color: transparent white transparent transparent; }
+    img { display: block; max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 4px; }
+  }
+  &:hover .image-tooltip { display: block; animation: fadeIn 0.2s ease-out; }
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-50%) scale(0.95); } to { opacity: 1; transform: translateY(-50%) scale(1); } }
