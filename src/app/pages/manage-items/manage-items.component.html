@@ -1,6 +1,7 @@
 <div class="layout">
   <app-sidebar></app-sidebar>
   <main class="content">
+
     <header class="page-header">
       <div>
         <h2>{{ userRole === 'admin' ? 'Inventory Management' : 'Equipment Catalog' }}</h2>
@@ -8,8 +9,12 @@
         <p *ngIf="userRole === 'student'">Browse items and make borrowing requests.</p>
       </div>
       <div class="header-actions">
-        <button *ngIf="userRole === 'admin'" class="btn-primary" (click)="showForm = true"><i class="fas fa-plus"></i> Add New Item</button>
-        <button *ngIf="userRole === 'student'" class="btn-primary-large" (click)="openBorrowModal()"><i class="fas fa-cart-plus"></i> Create Borrow Request</button>
+        <button *ngIf="userRole === 'admin'" class="btn-primary" (click)="openAddModal()">
+          <i class="fas fa-plus"></i> Add New Item
+        </button>
+        <button *ngIf="userRole === 'student'" class="btn-primary-large" (click)="openBorrowModal()">
+          <i class="fas fa-cart-plus"></i> Create Borrow Request
+        </button>
       </div>
     </header>
 
@@ -53,22 +58,41 @@
             <th *ngIf="userRole === 'admin'" class="text-right">Action</th>
           </tr>
         </thead>
-        <tbody>
+       <tbody>
           <tr *ngFor="let item of filteredItems">
             <td>
               <div class="item-name-wrapper">
                 <span class="item-name">{{ item.name }}</span>
                 <div class="image-tooltip" *ngIf="item.imageUrl">
-                  <img [src]="item.imageUrl" alt="Preview" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+                  <img [src]="item.imageUrl" alt="Preview" onerror="this.src='assets/placeholder.png'">
                 </div>
               </div>
             </td>
-            <td><span class="category-tag">{{ item.category }}</span></td>
-            <td><span [class.text-danger]="item.stock === 0" style="font-weight: 600;">{{ item.stock }}</span></td>
-            <td>{{ item.location }}</td>
-            <td><span class="badge" [ngClass]="item.stock > 0 ? 'available' : 'out'">{{ item.stock > 0 ? 'Available' : 'Out of Stock' }}</span></td>
+
+            <td><span class="category-tag">{{ item.category || '-' }}</span></td>
+
+            <td>
+              <span [class.text-danger]="!item.stock || item.stock === 0" style="font-weight: 600;">
+                {{ item.stock || 0 }}
+              </span>
+            </td>
+
+            <td>{{ item.location || '-' }}</td>
+
+            <td>
+              <span class="badge"
+                [ngClass]="(item.status || 'available').toLowerCase() == 'available' ? 'available' : 'out'">
+                {{ item.status || 'Unknown' }}
+              </span>
+            </td>
+
             <td *ngIf="userRole === 'admin'" class="text-right">
-              <button class="btn-icon delete" (click)="deleteItem(item.id)"><i class="fas fa-trash-alt"></i></button>
+              <button class="btn-icon edit" (click)="openEditModal(item)" title="Edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn-icon delete" (click)="deleteItem(item.id)" title="Delete">
+                <i class="fas fa-trash-alt"></i>
+              </button>
             </td>
           </tr>
 
@@ -87,14 +111,14 @@
 
     <div class="modal-overlay" *ngIf="showForm && userRole === 'admin'">
       <div class="modal-content">
-        <div class="modal-header"><h3>Input New Inventory</h3><button class="close-btn" (click)="showForm = false">&times;</button></div>
+        <div class="modal-header">
+          <h3>{{ editId ? 'Edit Item Details' : 'Input New Inventory' }}</h3>
+          <button class="close-btn" (click)="showForm = false">&times;</button>
+        </div>
         <div class="modal-body">
           <div class="form-grid">
             <div class="form-group full-width"><label>Item Name <span class="req">*</span></label><input [(ngModel)]="newItem.name" class="form-control" placeholder="e.g. MacBook Pro"></div>
-            <div class="form-group full-width">
-              <label>Image URL (Optional)</label>
-              <input [(ngModel)]="newItem.imageUrl" class="form-control" placeholder="https://example.com/image.jpg">
-            </div>
+            <div class="form-group full-width"><label>Image URL (Optional)</label><input [(ngModel)]="newItem.imageUrl" class="form-control" placeholder="https://example.com/image.jpg"></div>
             <div class="form-group">
               <label>Category</label>
               <select [(ngModel)]="newItem.category" class="form-control">
@@ -103,9 +127,24 @@
             </div>
             <div class="form-group"><label>Stock <span class="req">*</span></label><input [(ngModel)]="newItem.stock" type="number" min="0" class="form-control"></div>
             <div class="form-group full-width"><label>Location <span class="req">*</span></label><input [(ngModel)]="newItem.location" class="form-control" placeholder="e.g. Cabinet A"></div>
+
+            <div class="form-group" *ngIf="editId">
+               <label>Status</label>
+               <select [(ngModel)]="newItem.status" class="form-control">
+                  <option value="Available">Available</option>
+                  <option value="Maintenance">Maintenance</option>
+                  <option value="Damaged">Damaged</option>
+                  <option value="Lost">Lost</option>
+               </select>
+            </div>
           </div>
         </div>
-        <div class="modal-footer"><button class="btn-secondary" (click)="showForm = false">Cancel</button><button class="btn-save" (click)="saveRealItem()" [disabled]="isSaving">Save Item</button></div>
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="showForm = false">Cancel</button>
+          <button class="btn-save" (click)="saveRealItem()" [disabled]="isSaving">
+            {{ isSaving ? 'Processing...' : (editId ? 'Update Item' : 'Save Item') }}
+          </button>
+        </div>
       </div>
     </div>
 

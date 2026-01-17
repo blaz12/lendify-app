@@ -1,11 +1,19 @@
 import { Injectable } from '@angular/core';
 import {
-  Firestore, collection, collectionData, addDoc, doc, updateDoc, deleteDoc, query, where
+  Firestore,
+  collection,
+  collectionData,
+  addDoc,
+  doc,
+  updateDoc, // Pastikan updateDoc terimport
+  deleteDoc,
+  query,
+  where
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 export interface User { id?: string; name: string; email: string; studentId: string; role: 'Admin' | 'Student'; status: 'active' | 'pending' | 'rejected'; isDeleted?: boolean; password?: string; }
-export interface Item { id?: string; name: string; category: string; stock: number; location: string; status: 'Available' | 'Damaged' | 'Lost'; imageUrl?: string; }
+export interface Item { id?: string; name: string; category: string; stock: number; location: string; status: 'Available' | 'Maintenance' | 'Damaged' | 'Lost'; imageUrl?: string; }
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +22,7 @@ export class DatabaseService {
 
   constructor(private firestore: Firestore) {}
 
-  // --- USER ---
+  // --- USER (TIDAK BERUBAH) ---
   getUserByEmail(email: string): Observable<User[]> { const usersRef = collection(this.firestore, 'users'); const q = query(usersRef, where('email', '==', email)); return collectionData(q, { idField: 'id' }) as Observable<User[]>; }
   registerStudent(user: User) { const usersRef = collection(this.firestore, 'users'); return addDoc(usersRef, { ...user, role: 'Student', status: 'pending', isDeleted: false }); }
   getActiveUsers(): Observable<User[]> { const usersRef = collection(this.firestore, 'users'); const q = query(usersRef, where('status', '==', 'active'), where('isDeleted', '==', false)); return collectionData(q, { idField: 'id' }) as Observable<User[]>; }
@@ -29,8 +37,9 @@ export class DatabaseService {
   getItems(): Observable<Item[]> { const itemsRef = collection(this.firestore, 'items'); return collectionData(itemsRef, { idField: 'id' }) as Observable<Item[]>; }
   addItem(item: Item) { return addDoc(collection(this.firestore, 'items'), item); }
   deleteItem(id: string) { return deleteDoc(doc(this.firestore, `items/${id}`)); }
+  updateItem(id: string, data: Partial<Item>) {const docRef = doc(this.firestore, `items/${id}`);return updateDoc(docRef, data);}
 
-  // --- BORROWING ---
+  // --- BORROWING (TIDAK BERUBAH) ---
   getActiveBorrowings(): Observable<any[]> { const borrowRef = collection(this.firestore, 'borrowings'); return collectionData(borrowRef, { idField: 'id' }); }
   getAllBorrowings(): Observable<any[]> { const borrowRef = collection(this.firestore, 'borrowings'); return collectionData(borrowRef, { idField: 'id' }); }
 
@@ -50,9 +59,7 @@ export class DatabaseService {
 
   async rejectBorrowRequest(borrowLog: any) {
     const borrowRef = doc(this.firestore, `borrowings/${borrowLog.id}`);
-    // Update status jadi Rejected
     await updateDoc(borrowRef, { status: 'Rejected', returnDate: new Date().toISOString() });
-    // Kembalikan stok (PENTING: Kita perlu ambil stok saat ini dulu di component, lalu panggil restoreStock)
   }
 
   async restoreStock(itemId: string, qtyToAdd: number, currentStock: number) {
@@ -60,19 +67,13 @@ export class DatabaseService {
      await updateDoc(itemRef, { stock: currentStock + qtyToAdd });
   }
 
-  // [UPDATE] Tambah Parameter Condition
   async returnItem(borrowId: string, itemId: string, qty: number, currentStock: number, condition: string) {
     const borrowRef = doc(this.firestore, `borrowings/${borrowId}`);
-
-    // Update Log
     await updateDoc(borrowRef, {
       status: 'Returned',
       returnDate: new Date().toISOString(),
-      returnCondition: condition // Simpan kondisi (Good/Damaged/Lost)
+      returnCondition: condition
     });
-
-    // Update Stock (Hanya jika kondisi Good atau Damaged, jika Lost mungkin stok hilang permanen?)
-    // Untuk simplifikasi sistem ini: Kita anggap stok selalu kembali, nanti Admin delete item manual jika Lost.
     const itemRef = doc(this.firestore, `items/${itemId}`);
     await updateDoc(itemRef, { stock: currentStock + qty });
   }

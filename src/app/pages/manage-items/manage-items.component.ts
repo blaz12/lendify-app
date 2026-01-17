@@ -17,31 +17,29 @@ interface BorrowItem extends Item {
 })
 export class ManageItemsComponent implements OnInit {
 
-  items: BorrowItem[] = [];         // Data Mentah (Semua Barang)
-  filteredItems: BorrowItem[] = []; // Data Tampil (Hasil Filter/Search)
-
+  items: BorrowItem[] = [];        // Data Mentah
+  filteredItems: BorrowItem[] = []; // Data Tampil
   userRole: string = 'admin';
 
-  // State Admin
+  // --- ADMIN STATE ---
   showForm: boolean = false;
   isSaving: boolean = false;
+  editId: string | null = null; // [BARU] Untuk melacak ID yang sedang diedit
+
   newItem: Item = { name: '', category: 'Laptop', stock: 0, location: '', status: 'Available', imageUrl: '' };
 
-  // State Student
+  // --- STUDENT STATE ---
   isModalOpen: boolean = false;
   isSubmitting: boolean = false;
-
   borrowRequest = { location: '', purpose: '', borrowerName: '', startDate: '', endDate: '' };
   minDate: string = '';
 
-  // Sorting & Filtering State
-  sortColumn: string = '';
-  sortDirection: 'asc' | 'desc' = 'asc';
-
-  // [NEW] FILTER STATE
+  // --- FILTER & SORT STATE ---
   searchTerm: string = '';
   selectedCategory: string = 'All';
   categories: string[] = ['Laptop', 'Camera', 'Audio', 'Projector', 'Accessory', 'Other'];
+  sortColumn: string = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
 
   constructor(private db: DatabaseService) {}
 
@@ -52,49 +50,35 @@ export class ManageItemsComponent implements OnInit {
     this.minDate = today.toISOString().split('T')[0];
 
     this.db.getItems().subscribe(data => {
-      // Simpan ke data mentah
+      console.log('Data dari Firebase:', data);
+      // Mapping ke BorrowItem (tambah requestQty)
       this.items = data.map(i => ({ ...i, requestQty: 0 } as BorrowItem));
-
-      // Terapkan filter awal (menampilkan semua)
-      this.applyFilters();
+      this.applyFilters(); // Apply filter awal
     });
   }
 
-  // ==========================================
-  // [NEW] FILTER & SEARCH LOGIC
-  // ==========================================
-
+  // --- LOGIC FILTER & SORT (TIDAK BERUBAH) ---
   applyFilters() {
-    let tempItems = [...this.items]; // Copy array
+    let tempItems = [...this.items];
 
-    // 1. Filter by Category
     if (this.selectedCategory !== 'All') {
       tempItems = tempItems.filter(i => i.category === this.selectedCategory);
     }
-
-    // 2. Filter by Search Term (Name)
     if (this.searchTerm.trim() !== '') {
       const term = this.searchTerm.toLowerCase();
       tempItems = tempItems.filter(i => i.name.toLowerCase().includes(term));
     }
 
-    // 3. Apply Result
     this.filteredItems = tempItems;
-
-    // 4. Re-apply sorting if active
-    if (this.sortColumn) {
-      this.sortData(this.sortColumn);
-    }
+    if (this.sortColumn) this.sortData(this.sortColumn);
   }
 
-  // Reset Filter
   clearFilters() {
     this.searchTerm = '';
     this.selectedCategory = 'All';
     this.applyFilters();
   }
 
-  // --- SORTING LOGIC (Updated to use filteredItems) ---
   onSort(column: string) {
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
@@ -106,32 +90,58 @@ export class ManageItemsComponent implements OnInit {
   }
 
   sortData(column: string) {
-    // Kita sort filteredItems, bukan items asli
     this.filteredItems.sort((a: any, b: any) => {
       let valueA = a[column];
       let valueB = b[column];
-
       if (typeof valueA === 'string') valueA = valueA.toLowerCase();
       if (typeof valueB === 'string') valueB = valueB.toLowerCase();
-
       if (valueA < valueB) return this.sortDirection === 'asc' ? -1 : 1;
       if (valueA > valueB) return this.sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
   }
 
-  // --- ADMIN ACTIONS ---
+  // --- ADMIN ACTIONS (UPDATED) ---
+
+  // 1. Open Add (Reset Form)
+  openAddModal() {
+    this.editId = null; // Pastikan mode Add
+    this.newItem = { name: '', category: 'Laptop', stock: 0, location: '', status: 'Available', imageUrl: '' };
+    this.showForm = true;
+  }
+
+  // 2. Open Edit (Load Data)
+  openEditModal(item: Item) {
+    this.editId = item.id!; // Simpan ID
+    this.newItem = { ...item }; // Copy data ke form
+    this.showForm = true;
+  }
+
+  // 3. Save Logic (Add or Update)
   async saveRealItem() {
     if (!this.newItem.name || !this.newItem.location || this.newItem.stock < 0) {
       alert('Please fill all mandatory fields.'); return;
     }
     this.isSaving = true;
     try {
-      await this.db.addItem(this.newItem);
-      alert('Item added!');
+      if (this.editId) {
+        // [BARU] Logic Update
+        await this.db.updateItem(this.editId, this.newItem);
+        alert('Item updated successfully!');
+      } else {
+        // Logic Add Lama
+        await this.db.addItem(this.newItem);
+        alert('Item added successfully!');
+      }
       this.showForm = false;
+      this.editId = null; // Reset
       this.newItem = { name: '', category: 'Laptop', stock: 0, location: '', status: 'Available', imageUrl: '' };
-    } catch (err) { console.error(err); } finally { this.isSaving = false; }
+    } catch (err) {
+      console.error(err);
+      alert('Error saving item');
+    } finally {
+      this.isSaving = false;
+    }
   }
 
   async deleteItem(id: string | undefined) {
@@ -139,7 +149,7 @@ export class ManageItemsComponent implements OnInit {
     if (confirm('Delete item?')) await this.db.deleteItem(id);
   }
 
-  // --- STUDENT ACTIONS ---
+  // --- STUDENT ACTIONS (TIDAK BERUBAH - LOOPING) ---
   openBorrowModal() {
     this.borrowRequest.location = ''; this.borrowRequest.purpose = '';
     this.borrowRequest.startDate = ''; this.borrowRequest.endDate = '';
@@ -150,13 +160,10 @@ export class ManageItemsComponent implements OnInit {
   closeModal() { this.isModalOpen = false; }
 
   async submitBorrow() {
-    // Validasi input form
     if (!this.borrowRequest.location || !this.borrowRequest.purpose) { alert('Fill Location & Purpose'); return; }
     if (!this.borrowRequest.startDate || !this.borrowRequest.endDate) { alert('Select Dates'); return; }
 
-    // Cari item dari array items asli (karena filter view tidak boleh membatasi apa yang bisa dipinjam jika user mencari item lain di modal - *Note: Modal pakai list items full*)
     const selectedItems = this.items.filter(i => i.requestQty > 0);
-
     if (selectedItems.length === 0) { alert('Select Item'); return; }
 
     const invalidItem = selectedItems.find(i => i.requestQty > i.stock);
@@ -164,6 +171,7 @@ export class ManageItemsComponent implements OnInit {
 
     this.isSubmitting = true;
     try {
+      // Loop dan panggil borrowItem satu per satu
       for (const item of selectedItems) {
         await this.db.borrowItem(
           item, this.borrowRequest.borrowerName, this.borrowRequest.location, item.requestQty,
