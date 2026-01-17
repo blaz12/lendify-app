@@ -46,7 +46,7 @@ Sebelum menjalankan aplikasi, pastikan komputer Anda telah terinstal:
     Buka terminal dan clone project ini ke komputer lokal Anda:
     ```bash
     git clone [https://github.com/blaz12/lendify-app.git](https://github.com/blaz12/lendify-app.git)
-    cd lendify-project
+    cd lendify-app
     ```
 
 2.  **Install Dependencies**
