@@ -14,7 +14,7 @@ import { Observable } from 'rxjs';
 
 export interface User { id?: string; name: string; email: string; studentId: string; role: 'Admin' | 'Student'; status: 'active' | 'pending' | 'rejected'; isDeleted?: boolean; password?: string; }
 export interface Item { id?: string; name: string; category: string; stock: number; location: string; status: 'Available' | 'Maintenance' | 'Damaged' | 'Lost'; imageUrl?: string; }
-export interface Borrowing { id?: string; itemId: string; itemName: string; borrower: string; requestDate: string; borrowDate: string; dueDate: string; returnDate?: string; qty: number; location: string; status: 'Pending' | 'Borrowed' | 'Returned' | 'Rejected'; returnCondition?: string; }
+export interface Borrowing { id?: string; itemId: string; itemName: string; borrower: string; requestDate: string; borrowDate: string; dueDate: string; returnDate?: string; qty: number; location: string; status: 'Pending' | 'Borrowed' | 'Returned' | 'Rejected'; returnCondition?: string; purpose: string;  }
 @Injectable({
   providedIn: 'root'
 })
@@ -43,7 +43,7 @@ export class DatabaseService {
   getActiveBorrowings(): Observable<any[]> { const borrowRef = collection(this.firestore, 'borrowings'); return collectionData(borrowRef, { idField: 'id' }); }
   getAllBorrowings(): Observable<any[]> { const borrowRef = collection(this.firestore, 'borrowings'); return collectionData(borrowRef, { idField: 'id' }); }
 
-  async borrowItem(item: Item, borrowerName: string, location: string, qty: number, startDate: string, endDate: string) {
+  async borrowItem(item: Item, borrowerName: string, location: string, qty: number, startDate: string, endDate: string, purpose: string) {
     if (item.stock < qty) throw new Error('Stok tidak cukup!');
     const itemRef = doc(this.firestore, `items/${item.id}`);
     await updateDoc(itemRef, { stock: item.stock - qty });
@@ -51,7 +51,7 @@ export class DatabaseService {
     await addDoc(borrowRef, {
       itemName: item.name, itemId: item.id, borrower: borrowerName,
       requestDate: new Date().toISOString(), borrowDate: startDate, dueDate: endDate,
-      qty: qty, location: location, status: 'Pending'
+      qty: qty, location: location, status: 'Pending', purpose: purpose
     });
   }
 

@@ -175,7 +175,7 @@ export class ManageItemsComponent implements OnInit {
       for (const item of selectedItems) {
         await this.db.borrowItem(
           item, this.borrowRequest.borrowerName, this.borrowRequest.location, item.requestQty,
-          this.borrowRequest.startDate, this.borrowRequest.endDate
+          this.borrowRequest.startDate, this.borrowRequest.endDate, this.borrowRequest.purpose
         );
       }
       alert('Submitted!'); this.closeModal();
