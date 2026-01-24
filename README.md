@@ -1,60 +1,120 @@
-# LendifyApp
+# 📦 Lendify - Campus Inventory Management System
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.8.
+**Lendify** adalah aplikasi manajemen peminjaman barang berbasis web yang dibangun menggunakan **Angular 17** dan **Google Firebase**. Aplikasi ini dirancang untuk memudahkan admin mengelola aset kampus dan mahasiswa dalam melakukan pengajuan peminjaman barang.
 
-## Development server
+---
 
-To start a local development server, run:
+## 🚀 Fitur Utama
 
-```bash
-ng serve
-```
+### 👨‍💼 Admin Features
+- **Dashboard Inventaris:** Melihat daftar barang dengan status *real-time*.
+- **CRUD Barang:** Menambah, Mengedit, dan Menghapus data barang.
+- **Search & Filter:** Pencarian barang berdasarkan nama dan kategori.
+- **Manajemen Status:** Mengubah status barang (*Available, Maintenance, Damaged, Lost*).
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### 🎓 Student Features
+- **Katalog Barang:** Melihat daftar barang yang tersedia untuk dipinjam.
+- **Request Peminjaman:** Mengajukan peminjaman barang (bisa banyak barang sekaligus).
+- **Cek Ketersediaan:** Sistem otomatis mencegah peminjaman jika stok habis.
 
-## Code scaffolding
+---
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## 🛠️ Teknologi yang Digunakan
 
-```bash
-ng generate component component-name
-```
+- **Frontend:** Angular 17 (Standalone Components)
+- **Backend/Database:** Google Firebase (Firestore)
+- **Styling:** SCSS (Custom CSS)
+- **Language:** TypeScript
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
 
-```bash
-ng generate --help
-```
+## 📋 Prasyarat (Prerequisites)
 
-## Building
+Sebelum menjalankan aplikasi, pastikan komputer Anda telah terinstal:
 
-To build the project run:
+1.  **Node.js** (Versi LTS direkomendasikan): [Download Node.js](https://nodejs.org/)
+2.  **Angular CLI**: Install via terminal dengan perintah:
+    ```bash
+    npm install -g @angular/cli
+    ```
 
-```bash
-ng build
-```
+---
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## ⚙️ Cara Instalasi (Installation)
 
-## Running unit tests
+1.  **Clone Repository**
+    Buka terminal dan clone project ini ke komputer lokal Anda:
+    ```bash
+    git clone https://github.com/blaz12/lendify-app.git
+    cd lendify-app
+    ```
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+2.  **Install Dependencies**
+    Install semua library yang dibutuhkan (node_modules):
+    ```bash
+    npm install
+    ```
 
-```bash
-ng test
-```
+---
 
-## Running end-to-end tests
+## 🔥 Konfigurasi Firebase
 
-For end-to-end (e2e) testing, run:
+Agar aplikasi dapat terhubung ke database, Anda perlu mengatur konfigurasi Firebase:
 
-```bash
-ng e2e
-```
+1.  Buka file `src/environments/environment.ts` (atau buat jika belum ada).
+2.  Pastikan konfigurasi Firebase Anda sudah benar seperti format di bawah ini:
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+    ```typescript
+    export const environment = {
+      production: false,
+      firebase: {
+        apiKey: "AIzaSyD...",
+        authDomain: "your-project.firebaseapp.com",
+        projectId: "your-project-id",
+        storageBucket: "your-project.appspot.com",
+        messagingSenderId: "...",
+        appId: "..."
+      }
+    };
+    ```
+---
 
-## Additional Resources
+## ▶️ Cara Menjalankan Aplikasi (How to Run)
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-# lendify-app
+1.  **Jalankan Development Server**
+    Ketik perintah berikut di terminal:
+    ```bash
+    ng serve
+    ```
+
+2.  **Buka di Browser**
+    Buka browser (Chrome/Edge) dan akses alamat:
+    ```
+    http://localhost:4200/
+    ```
+
+---
+
+## 🧪 Cara Pengujian (Testing Roles)
+
+Aplikasi ini menggunakan simulasi Role sederhana via `localStorage`. Berikut cara berpindah akun:
+
+### 1. Masuk sebagai ADMIN
+Secara default aplikasi mungkin berjalan sebagai Student atau Admin. Untuk memaksa masuk sebagai **Admin**:
+1. Buka **Inspect Element** (F12) -> Tab **Application** -> **Local Storage**.
+2. Tambahkan Key: `demoRole` dengan Value: `admin`.
+3. Refresh halaman.
+4. Anda akan melihat tombol **Add New Item** dan tombol **Edit/Delete** di tabel.
+
+### 2. Masuk sebagai STUDENT
+Untuk masuk sebagai **Mahasiswa**:
+1. Ubah Value `demoRole` menjadi `student` di Local Storage.
+2. Refresh halaman.
+3. Anda akan melihat tombol **Create Borrow Request** dan checkbox pada tabel.
+
+---
+
+## 👤 Author
+**Nama:** Fadhil Aulia Haraba  
+**NPM:** 092023090411
+**Mata Kuliah:** Framework Based Programming
