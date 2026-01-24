@@ -14,7 +14,7 @@ import { Observable } from 'rxjs';
 
 export interface User { id?: string; name: string; email: string; studentId: string; role: 'Admin' | 'Student'; status: 'active' | 'pending' | 'rejected'; isDeleted?: boolean; password?: string; }
 export interface Item { id?: string; name: string; category: string; stock: number; location: string; status: 'Available' | 'Maintenance' | 'Damaged' | 'Lost'; imageUrl?: string; }
-
+export interface Borrowing { id?: string; itemId: string; itemName: string; borrower: string; requestDate: string; borrowDate: string; dueDate: string; returnDate?: string; qty: number; location: string; status: 'Pending' | 'Borrowed' | 'Returned' | 'Rejected'; returnCondition?: string; }
 @Injectable({
   providedIn: 'root'
 })
